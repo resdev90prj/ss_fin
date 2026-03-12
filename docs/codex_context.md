@@ -136,6 +136,7 @@
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.
 - Dashboard com fallback de resiliencia por bloco (queries criticas encapsuladas com `try/catch` e `error_log`) para evitar HTTP 500 por divergencia pontual de schema/dados em producao.
+- Consultas mensais de resumo/categorias no dashboard padronizadas para recorte por faixa de datas (`>= inicio_mes` e `< inicio_mes_seguinte`) para manter consistencia com a evolucao mensal e evitar divergencia por funcao SQL de formatacao.
 - Branding: favicon global e logo lateral reutilizam `public_html/assets/branding/finance_logo.ico`.
 - Deploy: scripts locais em PHP/BAT geram artefatos de migracao sem Composer/Docker.
 

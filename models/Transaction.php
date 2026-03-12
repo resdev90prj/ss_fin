@@ -451,14 +451,22 @@ class Transaction extends Model
 
     public function summaryMonth(int $userId, string $month): array
     {
+        [$startDate, $nextMonthStart] = $this->monthBoundaries($month);
+
         $sql = "SELECT
                 SUM(CASE WHEN type='income' THEN amount ELSE 0 END) AS incomes,
                 SUM(CASE WHEN type='expense' THEN amount ELSE 0 END) AS expenses,
                 SUM(CASE WHEN type='partner_withdrawal' THEN amount ELSE 0 END) AS withdrawals
                 FROM transactions
-                WHERE user_id = :user_id AND DATE_FORMAT(transaction_date, '%Y-%m') = :month";
+                WHERE user_id = :user_id
+                  AND transaction_date >= :start_date
+                  AND transaction_date < :next_month_start";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['user_id' => $userId, 'month' => $month]);
+        $stmt->execute([
+            'user_id' => $userId,
+            'start_date' => $startDate,
+            'next_month_start' => $nextMonthStart,
+        ]);
         return $stmt->fetch() ?: ['incomes' => 0, 'expenses' => 0, 'withdrawals' => 0];
     }
 
@@ -473,17 +481,32 @@ class Transaction extends Model
 
     public function expensesByCategoryMonth(int $userId, string $month): array
     {
+        [$startDate, $nextMonthStart] = $this->monthBoundaries($month);
+
         $sql = "SELECT c.name, SUM(t.amount) AS total
                 FROM transactions t
                 JOIN categories c ON c.id = t.category_id AND c.user_id = t.user_id
                 WHERE t.user_id = :user_id
                   AND t.type IN ('expense','partner_withdrawal')
-                  AND DATE_FORMAT(t.transaction_date, '%Y-%m') = :month
+                  AND t.transaction_date >= :start_date
+                  AND t.transaction_date < :next_month_start
                 GROUP BY c.name
                 ORDER BY total DESC";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['user_id' => $userId, 'month' => $month]);
+        $stmt->execute([
+            'user_id' => $userId,
+            'start_date' => $startDate,
+            'next_month_start' => $nextMonthStart,
+        ]);
         return $stmt->fetchAll();
+    }
+
+    private function monthBoundaries(string $month): array
+    {
+        $base = $month . '-01';
+        $startDate = date('Y-m-d', strtotime($base));
+        $nextMonthStart = date('Y-m-01', strtotime($base . ' +1 month'));
+        return [$startDate, $nextMonthStart];
     }
 
     public function monthlyEvolution(int $userId, int $months = 6): array
