@@ -35,6 +35,7 @@
     <?php if ($isAdmin): ?>
       <a class="block px-3 py-2 rounded hover:bg-slate-700" href="index.php?route=users">Usuários</a>
     <?php endif; ?>
+    <a class="block px-3 py-2 rounded hover:bg-slate-700" href="index.php?route=profile">Meu acesso</a>
     <a class="block px-3 py-2 rounded bg-red-700 hover:bg-red-600 mt-6" href="index.php?route=logout">Sair</a>
     <div class="pt-4 mt-4 border-t border-slate-700 flex justify-center">
       <img src="<?= e($assetBasePath . '/public_html/assets/branding/finance_logo_v3.ico?v=20260308_3') ?>" alt="Logo IA Finan" class="w-16 h-16 object-contain">

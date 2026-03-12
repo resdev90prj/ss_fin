@@ -87,6 +87,7 @@ require_once __DIR__ . '/controllers/ReportController.php';
 require_once __DIR__ . '/controllers/ImportController.php';
 require_once __DIR__ . '/controllers/UserController.php';
 require_once __DIR__ . '/controllers/TargetController.php';
+require_once __DIR__ . '/controllers/AlertController.php';
 
 switch ($route) {
     case 'login':
@@ -105,6 +106,9 @@ switch ($route) {
 
     case 'dashboard':
         (new DashboardController())->index();
+        break;
+    case 'agenda_execution':
+        (new DashboardController())->agendaExecution();
         break;
 
     case 'accounts':
@@ -228,6 +232,9 @@ switch ($route) {
     case 'imports/process_ofx_queue':
         (new ImportController())->processOfxQueue();
         break;
+    case 'alerts_dispatch':
+        (new AlertController())->dispatch();
+        break;
 
     case 'targets':
         (new TargetController())->index();
@@ -304,6 +311,18 @@ switch ($route) {
         break;
     case 'users_clear_scope':
         (new UserController())->clearScope();
+        break;
+    case 'profile':
+        (new UserController())->profile();
+        break;
+    case 'profile_update':
+        (new UserController())->profileUpdate();
+        break;
+    case 'profile_password':
+        (new UserController())->profilePassword();
+        break;
+    case 'profile_alerts':
+        (new UserController())->profileAlerts();
         break;
 
     default:

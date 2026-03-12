@@ -75,6 +75,18 @@ class DashboardController
             'Target::dashboardData',
             $userId
         );
+        $agendaData = $this->safeDashboardCall(
+            static fn(): array => $targetModel->executionAgendaData($userId, 120),
+            $this->defaultAgendaData(),
+            'Target::executionAgendaData',
+            $userId
+        );
+        $weeklyScoreData = $this->safeDashboardCall(
+            static fn(): array => $targetModel->executionWeeklyScoreData($userId, 8),
+            $this->defaultWeeklyScoreData(),
+            'Target::executionWeeklyScoreData',
+            $userId
+        );
         $transactionsEvolution = $this->safeDashboardCall(
             static fn(): array => $transactionModel->monthlyEvolutionRange($userId, $startMonth, $endMonth),
             [],
@@ -119,6 +131,34 @@ class DashboardController
             'projectedNet' => $projectedNet,
             'timelineContext' => $timelineContext,
             'planningData' => $planningData,
+            'agendaData' => $agendaData,
+            'weeklyScoreData' => $weeklyScoreData,
+        ]);
+    }
+
+    public function agendaExecution(): void
+    {
+        $userId = current_user_id();
+        if ($userId === null || $userId <= 0) {
+            flash('error', 'Sessao invalida. Faca login novamente.');
+            redirect('index.php?route=login');
+        }
+
+        $limit = (int)($_GET['limit'] ?? 200);
+        $limit = max(50, min($limit, 300));
+
+        $targetModel = new Target();
+        $agendaData = $this->safeDashboardCall(
+            static fn(): array => $targetModel->executionAgendaData($userId, $limit),
+            $this->defaultAgendaData(),
+            'Target::executionAgendaData',
+            $userId
+        );
+
+        view('dashboard/agenda_execution', [
+            'title' => 'Agenda de Execucao',
+            'agendaData' => $agendaData,
+            'limit' => $limit,
         ]);
     }
 
@@ -197,6 +237,110 @@ class DashboardController
             'next_actions' => [],
             'objective_overdue' => false,
             'objective_remaining_days' => null,
+            'execution_center' => [
+                'alert_badge' => 0,
+                'priority_counts' => [
+                    'critical' => 0,
+                    'high' => 0,
+                    'medium' => 0,
+                    'low' => 0,
+                    'no_deadline' => 0,
+                ],
+                'notifications' => [],
+                'immediate_attention' => [],
+                'next_actions' => [],
+                'sidebar_actions' => [],
+                'secondary_actions' => [],
+                'indicators' => [
+                    'pending' => 0,
+                    'overdue' => 0,
+                    'due_3_days' => 0,
+                    'completed_recently' => 0,
+                    'objective_progress' => 0.0,
+                    'target_progress' => 0.0,
+                ],
+                'progress_summary' => [
+                    'progress_percent' => 0.0,
+                    'total_actions' => 0,
+                    'done_actions' => 0,
+                    'pending_actions' => 0,
+                    'overdue_actions' => 0,
+                ],
+            ],
+        ];
+    }
+
+    private function defaultAgendaData(): array
+    {
+        return [
+            'active_target' => null,
+            'active_objective' => null,
+            'summary' => [
+                'total' => 0,
+                'overdue_count' => 0,
+                'due_today_count' => 0,
+                'due_3_days_count' => 0,
+                'in_progress_count' => 0,
+                'active_objective_count' => 0,
+                'active_target_count' => 0,
+                'pending_count' => 0,
+            ],
+            'focus_items' => [],
+            'items' => [],
+        ];
+    }
+
+    private function defaultWeeklyScoreData(): array
+    {
+        return [
+            'active_target' => null,
+            'active_objective' => null,
+            'current_week' => [
+                'week_start' => date('Y-m-d', strtotime('monday this week')),
+                'week_end' => date('Y-m-d', strtotime('sunday this week')),
+                'week_label' => '',
+                'score' => 0,
+                'classification_id' => 'critical',
+                'classification_label' => 'Critico',
+                'classification_badge_class' => 'bg-red-100 text-red-700',
+                'planned_count' => 0,
+                'completed_count' => 0,
+                'overdue_open_count' => 0,
+                'completed_active_target_count' => 0,
+                'completed_active_objective_count' => 0,
+                'completion_rate' => 0.0,
+                'target_bonus' => 0.0,
+                'objective_bonus' => 0.0,
+                'overdue_penalty' => 0.0,
+                'inactivity_penalty' => 0.0,
+            ],
+            'previous_week' => [
+                'week_start' => date('Y-m-d', strtotime('monday this week -7 days')),
+                'week_end' => date('Y-m-d', strtotime('sunday this week -7 days')),
+                'week_label' => '',
+                'score' => 0,
+                'classification_id' => 'critical',
+                'classification_label' => 'Critico',
+                'classification_badge_class' => 'bg-red-100 text-red-700',
+                'planned_count' => 0,
+                'completed_count' => 0,
+                'overdue_open_count' => 0,
+                'completed_active_target_count' => 0,
+                'completed_active_objective_count' => 0,
+                'completion_rate' => 0.0,
+                'target_bonus' => 0.0,
+                'objective_bonus' => 0.0,
+                'overdue_penalty' => 0.0,
+                'inactivity_penalty' => 0.0,
+            ],
+            'comparison' => [
+                'delta' => 0,
+                'trend' => 'stable',
+                'trend_label' => 'Estavel',
+                'trend_class' => 'text-slate-700',
+                'message' => 'Score semanal indisponivel no momento.',
+            ],
+            'history' => [],
         ];
     }
 
