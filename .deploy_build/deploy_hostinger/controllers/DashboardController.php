@@ -9,11 +9,6 @@ class DashboardController
     public function index(): void
     {
         $userId = current_user_id();
-        if ($userId === null || $userId <= 0) {
-            flash('error', 'Sessao invalida. Faca login novamente.');
-            redirect('index.php?route=login');
-        }
-
         $month = $this->resolveMonth($_GET['month'] ?? null);
         $monthDate = $month . '-01';
 
@@ -27,69 +22,17 @@ class DashboardController
         $installmentModel = new DebtInstallment();
         $targetModel = new Target();
 
-        $summary = $this->safeDashboardCall(
-            static fn(): array => $transactionModel->summaryMonth($userId, $month),
-            ['incomes' => 0, 'expenses' => 0, 'withdrawals' => 0],
-            'Transaction::summaryMonth',
-            $userId
-        );
-        $balance = (float)$this->safeDashboardCall(
-            static fn(): float => $transactionModel->balanceTotal($userId),
-            0.0,
-            'Transaction::balanceTotal',
-            $userId
-        );
-        $debtsOpen = (float)$this->safeDashboardCall(
-            static fn(): float => $debtModel->openTotal($userId),
-            0.0,
-            'Debt::openTotal',
-            $userId
-        );
-        $expensesByCategory = $this->safeDashboardCall(
-            static fn(): array => $transactionModel->expensesByCategoryMonth($userId, $month),
-            [],
-            'Transaction::expensesByCategoryMonth',
-            $userId
-        );
+        $summary = $transactionModel->summaryMonth($userId, $month);
+        $balance = $transactionModel->balanceTotal($userId);
+        $debtsOpen = $debtModel->openTotal($userId);
+        $expensesByCategory = $transactionModel->expensesByCategoryMonth($userId, $month);
 
-        $installmentProjection = $this->safeDashboardCall(
-            static fn(): array => $installmentModel->projectionSummaryByMonth($userId, $month),
-            [
-                'installments_count' => 0,
-                'installments_open_count' => 0,
-                'total_scheduled' => 0.0,
-                'total_due' => 0.0,
-            ],
-            'DebtInstallment::projectionSummaryByMonth',
-            $userId
-        );
-        $installmentDetails = $this->safeDashboardCall(
-            static fn(): array => $installmentModel->projectionDetailsByMonth($userId, $month),
-            [],
-            'DebtInstallment::projectionDetailsByMonth',
-            $userId
-        );
-        $planningData = $this->safeDashboardCall(
-            static fn(): array => $targetModel->dashboardData($userId),
-            $this->defaultPlanningData(),
-            'Target::dashboardData',
-            $userId
-        );
-        $transactionsEvolution = $this->safeDashboardCall(
-            static fn(): array => $transactionModel->monthlyEvolutionRange($userId, $startMonth, $endMonth),
-            [],
-            'Transaction::monthlyEvolutionRange',
-            $userId
-        );
-        $installmentsEvolution = $this->safeDashboardCall(
-            static fn(): array => $installmentModel->projectionByRange($userId, $startMonth, $endMonth),
-            [],
-            'DebtInstallment::projectionByRange',
-            $userId
-        );
+        $installmentProjection = $installmentModel->projectionSummaryByMonth($userId, $month);
+        $installmentDetails = $installmentModel->projectionDetailsByMonth($userId, $month);
+        $planningData = $targetModel->dashboardData($userId);
         $evolution = $this->buildEvolution(
-            $transactionsEvolution,
-            $installmentsEvolution,
+            $transactionModel->monthlyEvolutionRange($userId, $startMonth, $endMonth),
+            $installmentModel->projectionByRange($userId, $startMonth, $endMonth),
             $startMonth,
             $endMonth
         );
@@ -183,40 +126,5 @@ class DashboardController
         }
 
         return $evolution;
-    }
-
-    private function defaultPlanningData(): array
-    {
-        return [
-            'active_target' => null,
-            'active_objective' => null,
-            'pending_actions' => 0,
-            'done_actions' => 0,
-            'total_actions' => 0,
-            'progress_percent' => 0.0,
-            'next_actions' => [],
-            'objective_overdue' => false,
-            'objective_remaining_days' => null,
-        ];
-    }
-
-    /**
-     * Executa blocos do dashboard com fallback para evitar HTTP 500 em producao
-     * quando houver diferenca de schema/dados.
-     */
-    private function safeDashboardCall(callable $callback, $fallback, string $operation, int $userId)
-    {
-        try {
-            $result = $callback();
-            return $result ?? $fallback;
-        } catch (Throwable $e) {
-            error_log(sprintf(
-                '[dashboard] %s failed for user_id=%d: %s',
-                $operation,
-                $userId,
-                $e->getMessage()
-            ));
-            return $fallback;
-        }
     }
 }

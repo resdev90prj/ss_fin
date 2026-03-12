@@ -24,6 +24,7 @@
 ## Arquitetura
 - Padrao: MVC simples em um monolito.
 - Entrada unica: `index.php` com roteamento por query string (`route`).
+- `public_html/index.php` atua como bootstrap para carregar `../index.php` quando o docroot da hospedagem aponta para `public_html`.
 - Controllers orquestram fluxo e validacoes.
 - Models encapsulam SQL/CRUD via PDO.
 - Views renderizadas por funcao `view()` com `header/sidebar/footer`.
@@ -134,6 +135,7 @@
 - Flash messages por sessao.
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.
+- Dashboard com fallback de resiliencia por bloco (queries criticas encapsuladas com `try/catch` e `error_log`) para evitar HTTP 500 por divergencia pontual de schema/dados em producao.
 - Branding: favicon global e logo lateral reutilizam `public_html/assets/branding/finance_logo.ico`.
 - Deploy: scripts locais em PHP/BAT geram artefatos de migracao sem Composer/Docker.
 
