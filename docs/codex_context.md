@@ -10,6 +10,7 @@
 - Agenda de Execucao Diaria implementada com bloco resumido no dashboard (`Agenda de Hoje`) e tela expandida (`Agenda de Execucao`).
 - Score de Execucao Semanal implementado no dashboard com comparacao semanal e historico de evolucao.
 - Central de Alertas implementada com envio de digest por e-mail e arquitetura desacoplada pronta para futuro provider de WhatsApp.
+- Modo Privacidade Visual implementado no dashboard para ocultar rapidamente valores financeiros em tela.
 - Contexto atualizado em: 2026-03-12.
 
 ## Objetivo do sistema
@@ -51,7 +52,7 @@
 ## Modulos principais
 - Autenticacao: login/logout por sessao.
 - Usuarios (`users`): gestao administrativa de usuarios (listar, criar, editar, ativar/desativar, reset/alteracao de senha com confirmacao, troca de escopo de visualizacao) e area de autoatendimento `Meu acesso` para atualizar nome/e-mail e trocar a propria senha com validacao da senha atual.
-- Dashboard: KPIs por competencia, evolucao e projecoes com parcelas + `Central de Execucao` (sino de notificacoes, atencao imediata, proximas acoes, painel lateral de execucao e indicadores operacionais) + bloco `Agenda de Hoje`.
+- Dashboard: KPIs por competencia, evolucao e projecoes com parcelas + `Central de Execucao` (sino de notificacoes, atencao imediata, proximas acoes, painel lateral de execucao e indicadores operacionais) + bloco `Agenda de Hoje` + `Modo Privacidade` para ocultacao visual de valores financeiros.
 - Agenda (`agenda_execution`): tela expandida da execucao diaria com ordenacao automatica das acoes abertas do usuario.
 - Score semanal: bloco `Score de Execucao Semanal` no dashboard com nota `0-100`, classificacao interpretativa, comparacao com semana anterior e historico visual das ultimas semanas.
 - Central de Alertas (`alerts`):
@@ -183,6 +184,7 @@
 - Central de Alertas consolidada em `includes/AlertCenterService.php`, reaproveitando `Target::executionAgendaData()`, `Target::executionWeeklyScoreData()` e `Target::activeObjectiveProgressSnapshot()`.
 - Providers de notificacao usam contrato unico (`NotificationProviderInterface`) para manter expansao de canais sem alterar regras de negocio.
 - Logs de disparo persistem em `notification_dispatch_logs` (com fallback em arquivo quando tabela nao existir).
+- Modo Privacidade no dashboard usa classe semantica `financial-value` para marcar valores financeiros, aplica blur com `blur-sensitive` e persiste preferencia no `localStorage` (`dashboard_privacy_mode`).
 - Branding: favicon global e logo lateral reutilizam `public_html/assets/branding/finance_logo.ico`.
 - Deploy: scripts locais em PHP/BAT geram artefatos de migracao sem Composer/Docker.
 

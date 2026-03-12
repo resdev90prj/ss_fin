@@ -87,12 +87,32 @@ $weeklyCompletionRate = (float)($weeklyCurrent['completion_rate'] ?? 0.0);
 $weeklyDeltaLabel = $weeklyDelta > 0 ? '+' . $weeklyDelta : (string)$weeklyDelta;
 ?>
 
+<style>
+  .financial-value {
+    transition: filter 0.2s ease;
+  }
+
+  .blur-sensitive {
+    filter: blur(6px);
+  }
+</style>
+
 <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
   <div>
     <h2 class="text-2xl font-bold">Dashboard Financeiro - <?= e($monthLabel) ?></h2>
     <p class="text-sm text-slate-500 mt-1">Central de execucao: foco nas acoes que aproximam do alvo principal.</p>
   </div>
   <div class="flex items-start gap-2">
+    <button
+      id="privacyModeToggle"
+      type="button"
+      class="bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg px-3 py-2 shadow-sm inline-flex items-center gap-2"
+      aria-pressed="false"
+      title="Alternar modo privacidade dos valores financeiros"
+    >
+      <span id="privacyModeIcon" aria-hidden="true">&#128065;</span>
+      <span id="privacyModeLabel">Ocultar valores</span>
+    </button>
     <?php if (is_admin()): ?>
       <form method="POST" action="index.php?route=alerts_dispatch">
         <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
@@ -458,44 +478,44 @@ $weeklyDeltaLabel = $weeklyDelta > 0 ? '+' . $weeklyDelta : (string)$weeklyDelta
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
   <div class="bg-white p-4 rounded shadow">
     <p class="text-sm">Saldo acumulado</p>
-    <p class="text-xl font-bold">R$ <?= number_format((float)$balance, 2, ',', '.') ?></p>
+    <p class="text-xl font-bold"><span class="financial-value">R$ <?= number_format((float)$balance, 2, ',', '.') ?></span></p>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <p class="text-sm"><?= e($contextLabel) ?> de receitas</p>
-    <p class="text-xl font-bold text-emerald-600">R$ <?= number_format((float)$summary['incomes'], 2, ',', '.') ?></p>
+    <p class="text-xl font-bold text-emerald-600"><span class="financial-value">R$ <?= number_format((float)$summary['incomes'], 2, ',', '.') ?></span></p>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <p class="text-sm"><?= e($contextLabel) ?> de despesas</p>
-    <p class="text-xl font-bold text-red-600">R$ <?= number_format((float)$summary['expenses'], 2, ',', '.') ?></p>
+    <p class="text-xl font-bold text-red-600"><span class="financial-value">R$ <?= number_format((float)$summary['expenses'], 2, ',', '.') ?></span></p>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <p class="text-sm"><?= e($contextLabel) ?> de retiradas</p>
-    <p class="text-xl font-bold text-amber-600">R$ <?= number_format((float)$summary['withdrawals'], 2, ',', '.') ?></p>
+    <p class="text-xl font-bold text-amber-600"><span class="financial-value">R$ <?= number_format((float)$summary['withdrawals'], 2, ',', '.') ?></span></p>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <p class="text-sm">Parcelas da competencia</p>
-    <p class="text-xl font-bold text-orange-700">R$ <?= number_format((float)$installmentProjection['total_scheduled'], 2, ',', '.') ?></p>
-    <p class="text-xs text-slate-500 mt-1">Em aberto hoje: R$ <?= number_format((float)$installmentProjection['total_due'], 2, ',', '.') ?> (<?= (int)$installmentProjection['installments_open_count'] ?> de <?= (int)$installmentProjection['installments_count'] ?>)</p>
+    <p class="text-xl font-bold text-orange-700"><span class="financial-value">R$ <?= number_format((float)$installmentProjection['total_scheduled'], 2, ',', '.') ?></span></p>
+    <p class="text-xs text-slate-500 mt-1">Em aberto hoje: <span class="financial-value">R$ <?= number_format((float)$installmentProjection['total_due'], 2, ',', '.') ?></span> (<?= (int)$installmentProjection['installments_open_count'] ?> de <?= (int)$installmentProjection['installments_count'] ?>)</p>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <p class="text-sm">Resultado da competencia</p>
-    <p class="text-xl font-bold <?= e($netClass) ?>">R$ <?= number_format((float)$projectedNet, 2, ',', '.') ?></p>
-    <p class="text-xs text-slate-500 mt-1">Receber: R$ <?= number_format((float)$projectedReceivable, 2, ',', '.') ?> | Pagar: R$ <?= number_format((float)$projectedPayable, 2, ',', '.') ?></p>
+    <p class="text-xl font-bold <?= e($netClass) ?>"><span class="financial-value">R$ <?= number_format((float)$projectedNet, 2, ',', '.') ?></span></p>
+    <p class="text-xs text-slate-500 mt-1">Receber: <span class="financial-value">R$ <?= number_format((float)$projectedReceivable, 2, ',', '.') ?></span> | Pagar: <span class="financial-value">R$ <?= number_format((float)$projectedPayable, 2, ',', '.') ?></span></p>
   </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <div class="bg-white p-4 rounded shadow">
     <h3 class="font-semibold mb-2">Receber x Pagar (<?= e($monthLabel) ?>)</h3>
-    <canvas id="chartIncomeExpense"></canvas>
+    <canvas id="chartIncomeExpense" class="financial-value"></canvas>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <h3 class="font-semibold mb-2">Despesas por Categoria</h3>
-    <canvas id="chartCategories"></canvas>
+    <canvas id="chartCategories" class="financial-value"></canvas>
   </div>
   <div class="bg-white p-4 rounded shadow">
     <h3 class="font-semibold mb-2">Evolucao (ultimos 6 meses ate a competencia)</h3>
-    <canvas id="chartEvolution"></canvas>
+    <canvas id="chartEvolution" class="financial-value"></canvas>
   </div>
 </div>
 
@@ -522,9 +542,9 @@ $weeklyDeltaLabel = $weeklyDelta > 0 ? '+' . $weeklyDelta : (string)$weeklyDelta
           <td class="p-2"><?= e($item['debt_description']) ?></td>
           <td class="p-2 text-center">#<?= (int)$item['installment_number'] ?></td>
           <td class="p-2 text-center"><?= e($item['due_date']) ?></td>
-          <td class="p-2 text-center">R$ <?= number_format((float)$item['amount'], 2, ',', '.') ?></td>
-          <td class="p-2 text-center">R$ <?= number_format((float)$item['paid_amount'], 2, ',', '.') ?></td>
-          <td class="p-2 text-center font-semibold <?= $remaining > 0 ? 'text-orange-700' : 'text-emerald-700' ?>">R$ <?= number_format($remaining, 2, ',', '.') ?></td>
+          <td class="p-2 text-center"><span class="financial-value">R$ <?= number_format((float)$item['amount'], 2, ',', '.') ?></span></td>
+          <td class="p-2 text-center"><span class="financial-value">R$ <?= number_format((float)$item['paid_amount'], 2, ',', '.') ?></span></td>
+          <td class="p-2 text-center font-semibold <?= $remaining > 0 ? 'text-orange-700' : 'text-emerald-700' ?>"><span class="financial-value">R$ <?= number_format($remaining, 2, ',', '.') ?></span></td>
         </tr>
       <?php endforeach; ?>
       </tbody>
@@ -532,7 +552,7 @@ $weeklyDeltaLabel = $weeklyDelta > 0 ? '+' . $weeklyDelta : (string)$weeklyDelta
   <?php endif; ?>
 </div>
 
-<div class="mt-4 text-right text-sm text-slate-600">Dividas totais em aberto: <strong>R$ <?= number_format((float)$debtsOpen, 2, ',', '.') ?></strong></div>
+<div class="mt-4 text-right text-sm text-slate-600">Dividas totais em aberto: <strong class="financial-value">R$ <?= number_format((float)$debtsOpen, 2, ',', '.') ?></strong></div>
 
 <script>
 const expensesByCategory = <?= json_encode($expensesByCategory, JSON_UNESCAPED_UNICODE) ?>;
@@ -615,6 +635,50 @@ if (notifToggle && notifPanel) {
   document.addEventListener('click', (event) => {
     if (!notifPanel.classList.contains('hidden') && !notifPanel.contains(event.target) && !notifToggle.contains(event.target)) {
       notifPanel.classList.add('hidden');
+    }
+  });
+}
+
+const privacyStorageKey = 'dashboard_privacy_mode';
+const privacyToggle = document.getElementById('privacyModeToggle');
+const privacyIcon = document.getElementById('privacyModeIcon');
+const privacyLabel = document.getElementById('privacyModeLabel');
+
+const applyPrivacyMode = (enabled) => {
+  const sensitiveNodes = document.querySelectorAll('.financial-value');
+  sensitiveNodes.forEach((node) => {
+    node.classList.toggle('blur-sensitive', enabled);
+  });
+
+  if (!privacyToggle || !privacyIcon || !privacyLabel) {
+    return;
+  }
+
+  privacyToggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+  privacyIcon.innerHTML = enabled ? '&#128584;' : '&#128065;';
+  privacyLabel.textContent = enabled ? 'Mostrar valores' : 'Ocultar valores';
+};
+
+const initialPrivacyMode = (() => {
+  try {
+    return localStorage.getItem(privacyStorageKey) === 'on';
+  } catch (error) {
+    return false;
+  }
+})();
+
+applyPrivacyMode(initialPrivacyMode);
+
+if (privacyToggle) {
+  privacyToggle.addEventListener('click', () => {
+    const isHidden = privacyToggle.getAttribute('aria-pressed') === 'true';
+    const nextState = !isHidden;
+    applyPrivacyMode(nextState);
+
+    try {
+      localStorage.setItem(privacyStorageKey, nextState ? 'on' : 'off');
+    } catch (error) {
+      // Sem persistencia quando localStorage estiver indisponivel.
     }
   });
 }
