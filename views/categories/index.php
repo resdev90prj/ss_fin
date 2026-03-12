@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Categorias</h2>
+<h2 class="text-2xl font-bold mb-4">Categorias</h2>
 <form method="POST" action="index.php?route=categories_store" class="bg-white p-4 rounded shadow mb-6 grid md:grid-cols-4 gap-3">
   <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
   <input name="name" placeholder="Nome" required class="border rounded p-2">

@@ -4,6 +4,14 @@ $config = [
     'app_name' => 'SaaS IA Finan',
     'base_path' => dirname(__DIR__),
     'base_url' => rtrim((isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\'),
+    'debug' => [
+        // Debug geral desligado por padrao. Pode ser habilitado por variavel de ambiente ou config.custom.php.
+        'enabled' => getenv('APP_DEBUG') === '1',
+        // Exibe erros na tela apenas quando explicitamente habilitado.
+        'display_errors' => getenv('APP_DEBUG_DISPLAY') === '1',
+        // Caminho opcional para arquivo de log de erros do app.
+        'log_file' => getenv('APP_DEBUG_LOG') ?: null,
+    ],
     'db' => [
         'host' => getenv('DB_HOST') ?: '127.0.0.1',
         'port' => getenv('DB_PORT') ?: '3306',

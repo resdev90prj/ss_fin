@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../models/Budget.php';
 require_once __DIR__ . '/../models/Category.php';
 

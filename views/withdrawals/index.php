@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Retiradas do Sócio</h2>
+<h2 class="text-2xl font-bold mb-4">Retiradas do Sócio</h2>
 <p class="mb-3 text-sm text-slate-600">Tipos suportados: pró-labore, distribuição de lucro, retirada do sócio e gasto pessoal pago pela empresa.</p>
 <form method="POST" action="index.php?route=withdrawals_store" class="bg-white p-4 rounded shadow mb-6 grid md:grid-cols-4 gap-3">
   <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">

@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Contas Financeiras</h2>
+<h2 class="text-2xl font-bold mb-4">Contas Financeiras</h2>
 <form method="POST" action="index.php?route=accounts_store" class="bg-white p-4 rounded shadow mb-6 grid md:grid-cols-6 gap-3">
   <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
   <input name="name" placeholder="Nome da conta" required class="border rounded p-2 md:col-span-2">

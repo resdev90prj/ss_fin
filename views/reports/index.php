@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Relatórios Financeiros</h2>
+<h2 class="text-2xl font-bold mb-4">Relatórios Financeiros</h2>
 <form method="GET" class="bg-white p-4 rounded shadow mb-4 grid md:grid-cols-6 gap-2">
   <input type="hidden" name="route" value="reports">
   <input type="date" name="from" value="<?= e($filters['from']) ?>" class="border rounded p-2">

@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Metas Financeiras</h2>
+<h2 class="text-2xl font-bold mb-4">Metas Financeiras</h2>
 <form method="POST" action="index.php?route=goals_store" class="bg-white p-4 rounded shadow mb-6 grid md:grid-cols-5 gap-3">
   <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
   <input name="title" placeholder="Meta" required class="border rounded p-2">

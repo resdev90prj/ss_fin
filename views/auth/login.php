@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Entrar</h2>
+<h2 class="text-2xl font-bold mb-4">Entrar</h2>
 <form method="POST" action="index.php?route=login_submit" class="space-y-4">
   <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
   <div>

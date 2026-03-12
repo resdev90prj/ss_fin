@@ -1,6 +1,53 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/auth.php';
+
+function bootstrap_runtime_debug(): void
+{
+    $config = require __DIR__ . '/includes/config.php';
+    $debug = is_array($config['debug'] ?? null) ? $config['debug'] : [];
+    $enabled = !empty($debug['enabled']);
+    if (!$enabled) {
+        return;
+    }
+
+    error_reporting(E_ALL);
+    ini_set('log_errors', '1');
+
+    $logFile = trim((string)($debug['log_file'] ?? ''));
+    if ($logFile !== '') {
+        ini_set('error_log', $logFile);
+    }
+
+    $displayErrors = !empty($debug['display_errors']);
+    ini_set('display_errors', $displayErrors ? '1' : '0');
+
+    register_shutdown_function(static function (): void {
+        $lastError = error_get_last();
+        if (!$lastError) {
+            return;
+        }
+
+        $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+        if (!in_array($lastError['type'], $fatalTypes, true)) {
+            return;
+        }
+
+        $route = (string)($_GET['route'] ?? 'dashboard');
+        $uri = (string)($_SERVER['REQUEST_URI'] ?? '');
+        $message = sprintf(
+            '[runtime-fatal] route=%s uri=%s file=%s line=%d message=%s',
+            $route,
+            $uri,
+            (string)($lastError['file'] ?? ''),
+            (int)($lastError['line'] ?? 0),
+            (string)($lastError['message'] ?? '')
+        );
+        error_log($message);
+    });
+}
+
+bootstrap_runtime_debug();
 
 function view(string $path, array $data = []): void
 {

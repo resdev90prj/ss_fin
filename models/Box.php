@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/Model.php';
 
 class Box extends Model

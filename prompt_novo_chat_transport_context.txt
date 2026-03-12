@@ -1,0 +1,68 @@
+Antes de iniciar qualquer tarefa neste projeto, carregue e analise os seguintes arquivos de contexto:
+
+docs/codex_context.md  
+docs/codex_rules.md  
+docs/codex_template.md  
+
+OBJETIVO
+
+Esses arquivos representam a memória do projeto e devem ser considerados como fonte principal de contexto para qualquer decisão técnica.
+
+INSTRUÇÕES
+
+1. Leia completamente os arquivos de contexto antes de sugerir qualquer alteração no sistema.
+
+2. Utilize essas informações para entender:
+   - arquitetura atual
+   - stack tecnológica
+   - organização de pastas
+   - módulos existentes
+   - regras de negócio
+   - convenções técnicas
+   - decisões arquiteturais já tomadas
+   - limitações do ambiente
+
+3. Não recrie estruturas que já existam no projeto.
+
+4. Reutilize sempre que possível:
+   - models existentes
+   - controllers existentes
+   - helpers existentes
+   - regras de negócio existentes
+
+5. Evite alterações fora do escopo solicitado.
+
+6. Sempre respeite as regras definidas em:
+   docs/codex_rules.md
+
+7. Caso a tarefa envolva:
+   - criação de nova feature
+   - alteração estrutural
+   - mudança de arquitetura
+   - nova integração
+
+Atualize o arquivo:
+
+docs/codex_context.md
+
+registrando a mudança realizada.
+
+8. Sempre que houver dúvida sobre alguma decisão arquitetural, consulte primeiro o contexto existente antes de propor mudanças.
+
+9. Prefira soluções simples, compatíveis com a arquitetura atual do projeto.
+
+10. Sempre explique rapidamente como sua solução se encaixa no contexto existente do projeto.
+
+FLUXO DE TRABALHO
+
+Sempre siga esta ordem:
+
+1) Ler o contexto  
+2) Entender o estado atual do sistema  
+3) Propor solução alinhada ao projeto  
+4) Implementar apenas o necessário  
+5) Atualizar o contexto se houver mudança estrutural
+
+TAREFA ATUAL
+
+A tarefa que quero executar neste momento é:

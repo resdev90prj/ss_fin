@@ -1,4 +1,4 @@
-﻿<h2 class="text-2xl font-bold mb-4">Orçamento Mensal</h2>
+<h2 class="text-2xl font-bold mb-4">Orçamento Mensal</h2>
 <form method="POST" action="index.php?route=budgets_store" class="bg-white p-4 rounded shadow mb-6 grid md:grid-cols-4 gap-3">
   <input type="hidden" name="_csrf" value="<?= e(csrf_token()) ?>">
   <select name="category_id" required class="border rounded p-2"><option value="">Categoria</option><?php foreach($categories as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['name']) ?></option><?php endforeach; ?></select>
