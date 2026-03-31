@@ -64,9 +64,11 @@
 - Dashboard: KPIs por competencia, evolucao e projecoes com parcelas + `Central de Execucao` (sino de notificacoes, atencao imediata, proximas acoes, painel lateral de execucao e indicadores operacionais) + bloco `Agenda de Hoje` + `Modo Privacidade` para ocultacao visual de valores financeiros.
 - Release React paralela (`newrelease`):
   - layout base com navegacao protegida;
+  - menu React reorganizado por dominios (`Visao geral`, `Financeiro`, `Planejamento`, `Operacao`, `Analise`, `Conta` e `Admin` quando aplicavel), espelhando o mapa funcional do legado para evitar regressao de produto;
   - login React consumindo sessao PHP;
   - dashboard React com resumo financeiro, central de execucao, agenda, score semanal, modo privacidade e nova hierarquia visual SaaS baseada em cards, contrastes fortes e graficos leves;
-  - paginas iniciais para `accounts`, `categories`, `transactions`, `targets` e `agenda`.
+  - paginas iniciais para `accounts`, `categories`, `transactions`, `targets` e `agenda`;
+  - placeholders com ponte para o legado em modulos ainda nao migrados (`boxes`, `withdrawals`, `debts`, `budgets`, `goals`, `imports`, `reports`, `profile` e `users` para admin).
 - API JSON paralela (`api`):
   - endpoints iniciais para autenticacao, sessao, dashboard, contas, categorias, transacoes e resumo de execucao;
   - resposta padronizada `{ success, message, data, errors }`;
@@ -198,6 +200,7 @@
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
 - Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui e build estatico com `base=/newrelease/`.
+- Cada item relevante do menu legado agora possui rota correspondente no React; quando a tela ainda nao foi migrada, a rota React funciona como placeholder de navegacao e ponte explicita para o modulo PHP existente.
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.
 - Dashboard com fallback de resiliencia por bloco (queries criticas encapsuladas com `try/catch` e `error_log`) para evitar HTTP 500 por divergencia pontual de schema/dados em producao.

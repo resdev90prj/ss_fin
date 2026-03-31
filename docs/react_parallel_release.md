@@ -15,6 +15,7 @@
   - build estatico em `public_html/newrelease`;
   - API PHP em `public_html/api`.
   - UI evoluida com Tailwind CSS, componentes base no estilo shadcn/ui e graficos em Recharts para o dashboard.
+  - navegacao React agrupada por dominio e alinhada ao menu funcional do legado, com placeholders para modulos ainda nao migrados.
 
 ## Estrutura segura aplicada
 ```text
@@ -56,6 +57,7 @@ project-root/
 - `GET /api/me` entrega `csrf_token` para login/logout via frontend React.
 - `current_user_id()` e escopo admin continuam sendo resolvidos no backend.
 - A camada React usa design tokens locais, componentes reutilizaveis e graficos leves, sem mover logica de negocio para o frontend.
+- Quando uma funcionalidade do legado ainda nao tem tela React dedicada, ela continua visivel no menu por meio de rota placeholder e CTA para abrir o modulo PHP correspondente.
 
 ## Build e publicacao
 - Desenvolvimento local:
