@@ -64,8 +64,11 @@ project-root/
   - publicar `public_html/newrelease` como assets estaticos;
   - publicar `public_html/api` como nova entrada JSON;
   - manter `/` apontando para o legado.
+  - quando a hospedagem expuser a raiz do repositorio em vez de `public_html`, usar o `.htaccess` da raiz para alias de `/newrelease` -> `public_html/newrelease` e `/api` -> `public_html/api`.
 
 ## .htaccess necessario
+- `.htaccess` na raiz do projeto
+  - expande `/newrelease` e `/api` para `public_html/newrelease` e `public_html/api` em hospedagens que nao usam `public_html` como docroot.
 - `public_html/api/.htaccess`
   - roteia chamadas amigaveis da API para `public_html/api/index.php`.
 - `public_html/newrelease/.htaccess`
@@ -89,4 +92,3 @@ project-root/
   - promover React para `/`;
   - manter legado em uma rota de contingencia;
   - rollback = restaurar o apontamento de `/` para o legado e manter `/newrelease` como piloto.
-

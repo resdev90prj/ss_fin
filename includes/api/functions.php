@@ -57,9 +57,20 @@ function api_request_path(): string
         $uriPath = substr($uriPath, strlen($scriptDir));
     }
 
+    foreach (['/public_html/api', '/api'] as $prefix) {
+        if ($uriPath === $prefix) {
+            $uriPath = '/';
+            break;
+        }
+
+        if (str_starts_with($uriPath, $prefix . '/')) {
+            $uriPath = substr($uriPath, strlen($prefix));
+            break;
+        }
+    }
+
     $normalized = '/' . trim($uriPath, '/');
-    if ($normalized === '/')
-    {
+    if ($normalized === '/') {
         return '/';
     }
 
@@ -268,4 +279,3 @@ function api_format_month_label(string $month): string
 
     return ($labels[$monthNumber] ?? $monthNumber) . '/' . $year;
 }
-

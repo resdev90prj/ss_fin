@@ -1,6 +1,18 @@
 Options -Indexes
 DirectoryIndex index.php
 
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  RewriteCond %{DOCUMENT_ROOT}/public_html/newrelease/$1 -f
+  RewriteRule ^newrelease/(.+)$ public_html/newrelease/$1 [L]
+
+  RewriteRule ^newrelease/?$ public_html/newrelease/index.html [L]
+  RewriteRule ^newrelease/.*$ public_html/newrelease/index.html [L]
+
+  RewriteRule ^api(?:/.*)?$ public_html/api/index.php [QSA,L]
+</IfModule>
+
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
 </IfModule>

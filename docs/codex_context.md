@@ -32,6 +32,7 @@
 - Entrada unica: `index.php` com roteamento por query string (`route`).
 - `public_html/index.php` atua como bootstrap para carregar `../index.php` quando o docroot da hospedagem aponta para `public_html`.
 - Entrada paralela da API React: `public_html/api/index.php`, com roteamento proprio por path (`/api/...`) e resposta JSON padronizada.
+- `.htaccess` na raiz agora tambem atua como camada de compatibilidade para hospedagens que expõem a raiz do repositorio, encaminhando `/newrelease` e `/api` para `public_html/newrelease` e `public_html/api`.
 - Controllers orquestram fluxo e validacoes.
 - Models encapsulam SQL/CRUD via PDO.
 - Views renderizadas por funcao `view()` com `header/sidebar/footer`.
@@ -190,6 +191,7 @@
 ## Convencoes tecnicas observadas
 - Nome de rota por query (`index.php?route=...`).
 - API paralela usa path routes (`/api/login`, `/api/dashboard/summary`, etc.) sob `public_html/api/index.php`.
+- Em hospedagens onde `public_html` nao e o docroot, o acesso externo continua em `/newrelease` e `/api` por meio de rewrite no `.htaccess` raiz.
 - Controllers em `PascalCaseController.php`; models em `PascalCase.php`.
 - SQL via prepared statements PDO.
 - `PDO::ATTR_EMULATE_PREPARES = false` (placeholders devem ser tratados com cuidado).
