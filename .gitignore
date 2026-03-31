@@ -1,0 +1,4 @@
+.tools/
+frontend/newrelease/node_modules/
+frontend/newrelease/.vite/
+

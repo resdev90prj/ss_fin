@@ -11,7 +11,7 @@
 - Score de Execucao Semanal implementado no dashboard com comparacao semanal e historico de evolucao.
 - Central de Alertas implementada com envio de digest por e-mail e arquitetura desacoplada pronta para futuro provider de WhatsApp.
 - Modo Privacidade Visual implementado no dashboard para ocultar rapidamente valores financeiros em tela.
-- Contexto atualizado em: 2026-03-12.
+- Contexto atualizado em: 2026-03-31.
 
 ## Objetivo do sistema
 - Centralizar fluxo financeiro PF/PJ com visao operacional e analitica.
@@ -23,6 +23,7 @@
 - Backend: PHP puro.
 - Banco: MySQL/MariaDB via PDO.
 - Frontend: PHP views + Tailwind CSS via CDN + Chart.js via CDN.
+- Frontend paralelo de migracao: React 19 + React Router 7 + Vite 8, com build local e deploy estatico em subpasta.
 - Servidor local observado: XAMPP (`C:\xampp`), `php.exe` em `C:\xampp\php\php.exe`.
 - Composer: nao utilizado no projeto.
 
@@ -30,29 +31,45 @@
 - Padrao: MVC simples em um monolito.
 - Entrada unica: `index.php` com roteamento por query string (`route`).
 - `public_html/index.php` atua como bootstrap para carregar `../index.php` quando o docroot da hospedagem aponta para `public_html`.
+- Entrada paralela da API React: `public_html/api/index.php`, com roteamento proprio por path (`/api/...`) e resposta JSON padronizada.
 - Controllers orquestram fluxo e validacoes.
 - Models encapsulam SQL/CRUD via PDO.
 - Views renderizadas por funcao `view()` com `header/sidebar/footer`.
 - Sessao + autenticacao propria (`includes/helpers.php`, `includes/auth.php`).
+- Nova release React fica desacoplada do legado em `frontend/newrelease` (fonte) e `public_html/newrelease` (build estatico).
 
 ## Estrutura de diretorios
 - `controllers/`: controllers por modulo.
+- `controllers/api/`: controllers da API JSON da release React paralela.
 - `models/`: acesso a dados e regras de dominio.
 - `views/`: telas por modulo + layouts.
 - `includes/`: config, DB, auth, helpers e automacao OFX.
+- `includes/api/`: bootstrap e helpers da API JSON.
 - `includes/notifications/`: providers de notificacao (email atual + stub WhatsApp futuro).
 - `database/patches/`: patches SQL incrementais de schema.
 - `database/schema.sql`: schema base.
 - `imports/`: fila OFX (`pending`, `processed`, `error`, `logs`).
 - `public_html/`: front publico e uploads.
+- `public_html/api/`: endpoints JSON consumidos pela release React.
 - `public_html/assets/branding/`: ativos de marca (favicon/logo geral).
+- `public_html/newrelease/`: build estatico publicado em paralelo para validacao da nova UI React.
+- `frontend/newrelease/`: fonte do frontend React/Vite com Router e componentes por feature.
 - `favicon.ico` (raiz) e `public_html/favicon.ico`: fallback de favicon para evitar icone padrao do ambiente.
-- `deploy/`: rotinas e artefatos de publicacao para hospedagem compartilhada (Hostinger).
+- `docs/react_parallel_release.md`: guia da migracao paralela React + API + publicacao/rollback.
 
 ## Modulos principais
 - Autenticacao: login/logout por sessao.
 - Usuarios (`users`): gestao administrativa de usuarios (listar, criar, editar, ativar/desativar, reset/alteracao de senha com confirmacao, troca de escopo de visualizacao) e area de autoatendimento `Meu acesso` para atualizar nome/e-mail e trocar a propria senha com validacao da senha atual.
 - Dashboard: KPIs por competencia, evolucao e projecoes com parcelas + `Central de Execucao` (sino de notificacoes, atencao imediata, proximas acoes, painel lateral de execucao e indicadores operacionais) + bloco `Agenda de Hoje` + `Modo Privacidade` para ocultacao visual de valores financeiros.
+- Release React paralela (`newrelease`):
+  - layout base com navegacao protegida;
+  - login React consumindo sessao PHP;
+  - dashboard React com resumo financeiro, central de execucao, agenda, score semanal e modo privacidade;
+  - paginas iniciais para `accounts`, `categories`, `transactions`, `targets` e `agenda`.
+- API JSON paralela (`api`):
+  - endpoints iniciais para autenticacao, sessao, dashboard, contas, categorias, transacoes e resumo de execucao;
+  - resposta padronizada `{ success, message, data, errors }`;
+  - middleware proprio baseado na mesma sessao PHP do legado.
 - Agenda (`agenda_execution`): tela expandida da execucao diaria com ordenacao automatica das acoes abertas do usuario.
 - Score semanal: bloco `Score de Execucao Semanal` no dashboard com nota `0-100`, classificacao interpretativa, comparacao com semana anterior e historico visual das ultimas semanas.
 - Central de Alertas (`alerts`):
@@ -96,6 +113,7 @@
 
 ## Regras de negocio relevantes
 - Rotas publicas restritas (`login`, `login_submit`); demais exigem autenticacao.
+- Na API paralela, apenas `GET /api/me` pode responder sem sessao autenticada; endpoints de dados exigem sessao valida.
 - Sessao valida usuario ativo a cada requisicao protegida; usuarios inativos perdem acesso imediatamente.
 - Permissoes de acesso:
   - apenas admin pode listar todos os usuarios, criar novo acesso, editar outros usuarios e ativar/desativar usuarios;
@@ -105,6 +123,8 @@
   - usuario comum acessa apenas os dados vinculados ao proprio `user_id`;
   - admin pode operar em escopo proprio ou em escopo de outro usuario (contexto de visualizacao), sem trocar identidade de login.
 - Acoes de escrita em modulos financeiros validam propriedade de referencias (`account_id`, `category_id`, `box_id`) para evitar IDOR indireto.
+- A release React usa a mesma sessao do legado com `credentials: include`; permissoes continuam no backend e nunca no frontend.
+- `GET /api/me` entrega `csrf_token` para operacoes React de login/logout sem quebrar a estrategia atual de CSRF por sessao.
 - Acoes mutaveis exigem CSRF na maior parte dos formularios.
 - Categorias:
   - estrategia adotada: template de categorias padrao do sistema replicado por usuario (`ensureDefaultsForUser`);
@@ -169,11 +189,13 @@
 
 ## Convencoes tecnicas observadas
 - Nome de rota por query (`index.php?route=...`).
+- API paralela usa path routes (`/api/login`, `/api/dashboard/summary`, etc.) sob `public_html/api/index.php`.
 - Controllers em `PascalCaseController.php`; models em `PascalCase.php`.
 - SQL via prepared statements PDO.
 - `PDO::ATTR_EMULATE_PREPARES = false` (placeholders devem ser tratados com cuidado).
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
+- Frontend React usa `fetch` com `credentials: include`, Router em subpasta e build estatico com `base=/newrelease/`.
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.
 - Dashboard com fallback de resiliencia por bloco (queries criticas encapsuladas com `try/catch` e `error_log`) para evitar HTTP 500 por divergencia pontual de schema/dados em producao.
@@ -190,6 +212,9 @@
 
 ## Arquivos criticos
 - Entrada e roteamento: [index.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/index.php)
+- API paralela: [public_html/api/index.php](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/public_html/api/index.php), [includes/api/functions.php](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/includes/api/functions.php)
+- Frontend paralelo: [frontend/newrelease/vite.config.js](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/vite.config.js), [frontend/newrelease/src/App.jsx](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/src/App.jsx), [public_html/newrelease/index.html](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/public_html/newrelease/index.html)
+- Guia da migracao paralela: [docs/react_parallel_release.md](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/docs/react_parallel_release.md)
 - Config app/DB: [includes/config.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/config.php), [includes/db.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/db.php)
 - Auth/helpers: [includes/auth.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/auth.php), [includes/helpers.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/helpers.php)
 - Usuarios/perfis: [controllers/UserController.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/controllers/UserController.php), [models/User.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/models/User.php), [views/users/index.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/views/users/index.php)
@@ -215,6 +240,9 @@
 ## Decisoes arquiteturais ja tomadas
 - Manter aplicacao sem framework externo, privilegiando portabilidade em hospedagem compartilhada.
 - Manter rotas centralizadas em `index.php` (switch-case).
+- Nao mover o legado para `app_legacy` agora; a fase atual da migracao paralela mantem o sistema validado exatamente onde esta.
+- Criar a nova UI React em subpasta (`/newrelease`) e a nova API em subpasta (`/api`) para validar em producao sem virada imediata.
+- Manter o backend, a sessao e as regras de autorizacao no PHP; React atua apenas como camada de interface.
 - Manter segregacao de dados em todos os modulos via `user_id`, sem criar nova camada de autorizacao externa.
 - Implementar contexto de visualizacao para admin no proprio `includes/auth.php` (escopo em sessao), evitando duplicar controllers/views para modo admin.
 - Implementar modulo de planejamento como subdominio interno no mesmo MVC (sem camada paralela), com regras de execucao no controller/model e visualizacao hierarquica nas views.
@@ -257,9 +285,9 @@
 - Implementar provider real de WhatsApp quando credenciais/API estiverem definidas.
 
 ## Proximos passos sugeridos
-1. Criar checklist de regressao manual por modulo critico (dividas, transacoes, importacao).
-2. Padronizar encoding UTF-8 nos arquivos com texto de UI.
-3. Definir rotina cron para `includes/process_ofx_queue.php`.
-4. Definir rotina cron para `includes/process_alerts.php`.
-5. Documentar patch SQL incremental de mudancas de schema fora do `schema.sql`.
-6. Iniciar suite minima de testes para regras de divida, deduplicacao OFX e notificacoes.
+1. Validar login, logout, assets e navegacao da release React em `/newrelease` com usuarios internos.
+2. Restringir acesso inicial ao piloto React (admin/IP/lista controlada) antes da abertura ampla.
+3. Evoluir a API paralela com endpoints de escrita para os modulos que passarem na validacao de leitura.
+4. Criar checklist de regressao manual por modulo critico (dividas, transacoes, importacao).
+5. Definir rotina cron para `includes/process_ofx_queue.php` e `includes/process_alerts.php`.
+6. Iniciar suite minima de testes para regras de divida, deduplicacao OFX, notificacoes e API paralela.
