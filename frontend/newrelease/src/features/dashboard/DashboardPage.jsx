@@ -1,12 +1,59 @@
 import { useEffect, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import {
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  CalendarClock,
+  Eye,
+  EyeOff,
+  Goal,
+  ShieldEllipsis,
+  Sparkles,
+  Target,
+  Wallet,
+} from 'lucide-react';
 import AlertsSummary from '../../components/AlertsSummary';
 import HorizontalBarChart from '../../components/HorizontalBarChart';
 import LoadingState from '../../components/LoadingState';
 import SectionCard from '../../components/SectionCard';
+import SensitiveValue from '../../components/SensitiveValue';
 import StatCard from '../../components/StatCard';
 import TrendLines from '../../components/TrendLines';
+import { Badge } from '../../components/ui/badge';
+import { Progress } from '../../components/ui/progress';
+import { Switch } from '../../components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { apiRequest } from '../../lib/apiClient';
 import { currentMonthValue, formatCurrency, formatDate, formatNumber, formatPercent } from '../../lib/formatters';
+
+const weeklyColors = ['#155eef', '#3b82f6', '#06b6d4', '#22c55e', '#f59e0b', '#e11d48'];
+const categoryColors = ['#155eef', '#3b82f6', '#06b6d4', '#039855', '#d97706', '#e11d48'];
+
+function urgencyBadge(urgencyText) {
+  const text = String(urgencyText || '').toLowerCase();
+  if (text.includes('atras')) {
+    return 'danger';
+  }
+  if (text.includes('hoje') || text.includes('amanha')) {
+    return 'warning';
+  }
+  if (text.includes('dias')) {
+    return 'info';
+  }
+  return 'secondary';
+}
 
 export default function DashboardPage() {
   const [month, setMonth] = useState(currentMonthValue());
@@ -46,8 +93,7 @@ export default function DashboardPage() {
     return () => controller.abort();
   }, [month]);
 
-  function togglePrivacy() {
-    const nextValue = !privacyMode;
+  function togglePrivacy(nextValue) {
     setPrivacyMode(nextValue);
 
     if (data?.privacy?.storage_key) {
@@ -56,14 +102,16 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return <LoadingState text="Montando os indicadores financeiros e a central de execucao." />;
+    return <LoadingState text="Montando o novo cockpit visual do seu dashboard financeiro." />;
   }
 
   if (!data) {
     return (
       <section className="state-card">
-        <h2>Dashboard indisponivel</h2>
-        <p>{error || 'Nao foi possivel carregar os dados do dashboard.'}</p>
+        <div>
+          <h2 className="text-lg font-bold tracking-tight text-slate-950">Dashboard indisponivel</h2>
+          <p className="mt-1 text-sm text-slate-600">{error || 'Nao foi possivel carregar os dados do dashboard.'}</p>
+        </div>
       </section>
     );
   }
@@ -74,179 +122,452 @@ export default function DashboardPage() {
   const agendaSummary = agenda.summary || {};
   const weeklyCurrent = weeklyScore.current_week || {};
   const planning = data.planning || {};
-  const privateClass = privacyMode ? 'private-value private-value--hidden' : 'private-value';
+  const priorityCounts = executionCenter.priority_counts || {};
+  const weeklyHistory = (weeklyScore.history || []).map((item, index) => ({
+    ...item,
+    fill: weeklyColors[index % weeklyColors.length],
+  }));
 
   return (
     <div className="page-stack">
-      <section className="hero-card">
-        <div>
-          <span className="hero-card__eyebrow">Resumo financeiro + execucao</span>
-          <h1>Dashboard da nova release</h1>
-          <p>
-            Camada React em paralelo ao legado, consumindo JSON PHP e preservando a
-            mesma logica de autenticacao, escopo e user_id.
+      <section className="hero-card bg-grid-slate">
+        <div className="max-w-3xl">
+          <span className="hero-card__eyebrow">Dashboard Financeiro / New release</span>
+          <h1 className="font-display text-4xl tracking-tight text-slate-950 md:text-5xl">
+            Leitura mais rápida, mais forte e mais estratégica do seu caixa.
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
+            Mantive a mesma lógica do backend PHP e reorganizei a experiência para dar mais
+            protagonismo ao saldo, ao plano ativo e às ações que exigem resposta imediata.
           </p>
         </div>
 
-        <div className="hero-card__actions">
-          <label className="month-input">
-            <span>Competencia</span>
+        <div className="flex w-full max-w-md flex-col gap-4 rounded-[28px] border border-slate-200 bg-white/95 p-5 shadow-sm">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Competencia ativa</p>
             <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
-          </label>
+          </div>
 
-          <button className="ghost-button" type="button" onClick={togglePrivacy}>
-            {privacyMode ? 'Mostrar valores' : 'Ocultar valores'}
-          </button>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Modo privacidade</p>
+                <p className="text-xs text-slate-500">Oculta valores sem comprometer a navegação.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {privacyMode ? <EyeOff className="h-4 w-4 text-slate-500" /> : <Eye className="h-4 w-4 text-slate-500" />}
+                <Switch checked={privacyMode} onCheckedChange={togglePrivacy} />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-slate-950 px-4 py-4 text-white">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Periodo</p>
+              <p className="mt-3 text-xl font-bold">{data.month_label}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Contexto</p>
+              <p className="mt-3 text-xl font-bold capitalize text-slate-950">{data.timeline_context}</p>
+            </div>
+          </div>
         </div>
       </section>
 
       <div className="stats-grid stats-grid--wide">
-        <StatCard label="Saldo acumulado" value={formatCurrency(data.balance)} tone="neutral" privateValue />
-        <StatCard label="Receitas" value={formatCurrency(data.summary?.incomes)} tone="positive" privateValue />
-        <StatCard label="Despesas" value={formatCurrency(data.summary?.expenses)} tone="danger" privateValue />
-        <StatCard label="Retiradas" value={formatCurrency(data.summary?.withdrawals)} tone="warning" privateValue />
         <StatCard
-          label="Parcelas na competencia"
-          value={formatCurrency(data.installment_projection?.total_scheduled)}
-          hint={`Em aberto hoje: ${formatCurrency(data.installment_projection?.total_due)}`}
-          tone="accent"
+          className="xl:col-span-2"
+          label="Saldo acumulado"
+          value={formatCurrency(data.balance)}
+          hint={`Receber ${formatCurrency(data.projected_receivable)} | Pagar ${formatCurrency(data.projected_payable)}`}
+          tone="neutral"
           privateValue
+          hidden={privacyMode}
+          featured
+          icon={<Wallet className="h-5 w-5" />}
         />
         <StatCard
-          label="Resultado da competencia"
+          label="Receitas"
+          value={formatCurrency(data.summary?.incomes)}
+          hint="Entrada prevista na competencia"
+          tone="positive"
+          privateValue
+          hidden={privacyMode}
+          icon={<ArrowUpRight className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Despesas"
+          value={formatCurrency(data.summary?.expenses)}
+          hint="Saidas operacionais do periodo"
+          tone="danger"
+          privateValue
+          hidden={privacyMode}
+          icon={<ArrowDownRight className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Retiradas"
+          value={formatCurrency(data.summary?.withdrawals)}
+          hint="Movimento de retirada do socio"
+          tone="warning"
+          privateValue
+          hidden={privacyMode}
+          icon={<ShieldEllipsis className="h-5 w-5" />}
+        />
+        <StatCard
+          label="Resultado"
           value={formatCurrency(data.projected_net)}
-          hint={`Contexto: ${data.timeline_context}`}
+          hint={Number(data.projected_net) >= 0 ? 'Competencia saudavel' : 'Atenção para o fluxo'}
           tone={Number(data.projected_net) >= 0 ? 'positive' : 'danger'}
           privateValue
+          hidden={privacyMode}
+          icon={<Sparkles className="h-5 w-5" />}
         />
       </div>
 
-      <div className="dashboard-grid">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.85fr)]">
         <SectionCard
-          title="Central de execucao"
-          subtitle="Foco no alvo ativo, agenda de hoje e score semanal."
+          title="Central de execução"
+          subtitle="Agora com foco explícito no alvo ativo, no risco imediato e na hierarquia das próximas ações."
         >
           {planning.active_target ? (
-            <div className="stack-list">
-              <article className="stack-item stack-item--accent">
-                <div>
-                  <strong>Alvo ativo</strong>
-                  <p>{planning.active_target.title}</p>
-                </div>
-                <small>{formatPercent(planning.progress_percent)}</small>
-              </article>
+            <div className="space-y-5">
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(260px,0.75fr)]">
+                <div className="rounded-[26px] bg-slate-950 p-6 text-white">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <Badge variant="secondary" className="border-white/10 bg-white/10 text-slate-200">
+                        Alvo ativo
+                      </Badge>
+                      <h3 className="mt-4 font-display text-3xl tracking-tight">{planning.active_target.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">
+                        {planning.active_objective?.title || 'Sem objetivo ativo definido no momento.'}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-right">
+                      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Progresso</p>
+                      <p className="mt-3 text-3xl font-bold">{formatPercent(planning.progress_percent)}</p>
+                    </div>
+                  </div>
 
-              <article className="stack-item">
-                <div>
-                  <strong>Objetivo atual</strong>
-                  <p>{planning.active_objective?.title || 'Sem objetivo ativo'}</p>
+                  <div className="mt-5 space-y-3">
+                    <Progress value={planning.progress_percent} className="bg-white/10" indicatorClassName="bg-white" />
+                    <div className="grid gap-3 text-sm text-slate-300 sm:grid-cols-3">
+                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Pendentes</p>
+                        <p className="mt-2 text-2xl font-bold text-white">{formatNumber(planning.pending_actions)}</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Concluídas</p>
+                        <p className="mt-2 text-2xl font-bold text-white">{formatNumber(planning.done_actions)}</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Objetivo</p>
+                        <p className="mt-2 text-2xl font-bold text-white">
+                          {planning.objective_overdue ? 'Atrasado' : `${planning.objective_remaining_days ?? '-'}d`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <small>
-                  {planning.objective_overdue
-                    ? 'Objetivo atrasado'
-                    : planning.objective_remaining_days ?? '-'} dias
-                </small>
-              </article>
 
-              <article className="stack-item">
-                <div>
-                  <strong>Agenda prioritaria</strong>
-                  <p>
-                    {formatNumber(agendaSummary.overdue_count || 0)} atrasadas,{' '}
-                    {formatNumber(agendaSummary.due_today_count || 0)} para hoje
-                  </p>
-                </div>
-                <small>{formatNumber(agendaSummary.total || 0)} itens em aberto</small>
-              </article>
+                <div className="space-y-4">
+                  <div className="rounded-[26px] border border-rose-200 bg-rose-50 p-5">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">
+                      <AlertTriangle className="h-4 w-4" />
+                      Ações críticas
+                    </div>
+                    <p className="mt-4 text-4xl font-extrabold tracking-tight text-rose-800">{priorityCounts.critical || 0}</p>
+                    <p className="mt-2 text-sm text-rose-700">Itens atrasados ou já pressionando a execução.</p>
+                  </div>
 
-              <article className="stack-item">
-                <div>
-                  <strong>Score semanal</strong>
-                  <p>{weeklyCurrent.classification_label || 'Sem classificacao'}</p>
+                  <div className="rounded-[26px] border border-blue-200 bg-blue-50 p-5">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                      <Goal className="h-4 w-4" />
+                      Prioridade tática
+                    </div>
+                    <p className="mt-4 text-4xl font-extrabold tracking-tight text-blue-800">
+                      {(priorityCounts.high || 0) + (priorityCounts.medium || 0)}
+                    </p>
+                    <p className="mt-2 text-sm text-blue-700">Ações para hoje e próximos dias.</p>
+                  </div>
                 </div>
-                <small>{formatNumber(weeklyCurrent.score || 0)} pontos</small>
-              </article>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Atenção imediata</h4>
+                    <Badge variant="danger">{formatNumber((executionCenter.immediate_attention || []).length)} itens</Badge>
+                  </div>
+                  {(executionCenter.immediate_attention || []).slice(0, 4).map((action) => (
+                    <article key={action.id} className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <strong className="text-sm font-semibold text-slate-950">{action.title}</strong>
+                          <p className="mt-1 text-sm text-slate-600">{action.objective_title || 'Sem objetivo'}</p>
+                        </div>
+                        <Badge variant={urgencyBadge(action.urgency_text)}>{action.priority_label}</Badge>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                        <span>{action.urgency_text || 'Sem urgência'}</span>
+                        <span>{formatDate(action.planned_date)}</span>
+                      </div>
+                    </article>
+                  ))}
+                  {(executionCenter.immediate_attention || []).length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                      Nenhuma ação crítica agora. A execução está sob controle.
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Próximas ações</h4>
+                    <Badge variant="info">{formatNumber((executionCenter.next_actions || []).length)} mapeadas</Badge>
+                  </div>
+                  {(executionCenter.next_actions || []).slice(0, 4).map((action) => (
+                    <article key={action.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <strong className="text-sm font-semibold text-slate-950">{action.title}</strong>
+                          <p className="mt-1 text-sm text-slate-600">{action.decision_title || 'Sem decisão'}</p>
+                        </div>
+                        <Badge variant={urgencyBadge(action.urgency_text)}>{action.priority_label}</Badge>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                        <span>{action.urgency_text || 'Sem urgência'}</span>
+                        <span>{formatDate(action.planned_date)}</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
-            <p className="muted-line">Nenhum alvo ativo no momento. O legado continua sendo a referencia principal ate a validacao desta release.</p>
+            <div className="rounded-[28px] border border-dashed border-slate-200 bg-slate-50 px-5 py-10 text-center">
+              <Target className="mx-auto h-8 w-8 text-slate-400" />
+              <h3 className="mt-4 text-lg font-semibold text-slate-900">Nenhum alvo ativo no momento</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Quando um alvo for ativado no legado, esta área passa a destacar automaticamente progresso, prioridades e risco.
+              </p>
+            </div>
           )}
         </SectionCard>
 
-        <AlertsSummary executionCenter={executionCenter} />
-      </div>
+        <div className="space-y-6">
+          <AlertsSummary executionCenter={executionCenter} />
 
-      <div className="dashboard-grid">
-        <SectionCard title="Agenda de hoje" subtitle="Itens priorizados pela ordenacao do backend.">
-          <div className="pill-grid">
-            <div className="pill pill-danger">Atrasadas {agendaSummary.overdue_count || 0}</div>
-            <div className="pill pill-warning">Hoje {agendaSummary.due_today_count || 0}</div>
-            <div className="pill pill-accent">Ate 3 dias {agendaSummary.due_3_days_count || 0}</div>
-            <div className="pill pill-neutral">Em andamento {agendaSummary.in_progress_count || 0}</div>
-          </div>
+          <SectionCard
+            title="Agenda de hoje"
+            subtitle="Prioridade de execução com leitura mais rápida por urgência."
+            action={<Badge variant="outline">{formatNumber(agendaSummary.total || 0)} itens</Badge>}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">Atrasadas</p>
+                <p className="mt-2 text-3xl font-bold text-rose-800">{formatNumber(agendaSummary.overdue_count || 0)}</p>
+              </div>
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">Hoje</p>
+                <p className="mt-2 text-3xl font-bold text-amber-800">{formatNumber(agendaSummary.due_today_count || 0)}</p>
+              </div>
+            </div>
 
-          <div className="stack-list">
-            {(agenda.focus_items || []).slice(0, 5).map((item) => (
-              <article key={item.id} className="stack-item">
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>{item.objective_title || 'Sem objetivo'}</p>
+            <div className="mt-5 space-y-3">
+              {(agenda.focus_items || []).slice(0, 4).map((item) => (
+                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <strong className="text-sm font-semibold text-slate-950">{item.title}</strong>
+                      <p className="mt-1 text-sm text-slate-600">{item.objective_title || 'Sem objetivo'} • {item.target_title || 'Sem alvo'}</p>
+                    </div>
+                    <Badge variant={urgencyBadge(item.urgency_text || item.priority_label)}>{item.priority_label}</Badge>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                    <span>{item.urgency_text || 'Sem urgência'}</span>
+                    <span>{formatDate(item.planned_date)}</span>
+                  </div>
+                </article>
+              ))}
+              {(agenda.focus_items || []).length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                  Nenhum foco crítico identificado para hoje.
                 </div>
-                <small>{item.urgency_text || 'Sem urgencia'}</small>
-              </article>
-            ))}
-
-            {(agenda.focus_items || []).length === 0 ? (
-              <p className="muted-line">Nenhum item urgente identificado para hoje.</p>
-            ) : null}
-          </div>
-        </SectionCard>
-
-        <SectionCard title="Score semanal" subtitle="Leitura rapida para acompanhamento operacional.">
-          <div className="score-card">
-            <div>
-              <span>Score atual</span>
-              <strong>{formatNumber(weeklyCurrent.score || 0)}</strong>
+              ) : null}
             </div>
-            <div>
-              <span>Classificacao</span>
-              <strong>{weeklyCurrent.classification_label || 'Critico'}</strong>
-            </div>
-            <div>
-              <span>Conclusao</span>
-              <strong>{formatPercent(weeklyCurrent.completion_rate || 0)}</strong>
-            </div>
-          </div>
+          </SectionCard>
+        </div>
+      </div>
 
-          <div className="stack-list">
-            {(weeklyScore.history || []).slice(-4).reverse().map((week) => (
-              <article key={week.week_start} className="stack-item">
-                <div>
-                  <strong>{week.week_label}</strong>
-                  <p>{week.classification_label}</p>
+      <SectionCard
+        title="Painel visual da competência"
+        subtitle="Gráficos mais leves e mais legíveis para leitura gerencial rápida."
+      >
+        <Tabs defaultValue="cashflow">
+          <TabsList>
+            <TabsTrigger value="cashflow">Fluxo</TabsTrigger>
+            <TabsTrigger value="categories">Categorias</TabsTrigger>
+            <TabsTrigger value="score">Score semanal</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="cashflow">
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-4">
+                <TrendLines items={data.evolution || []} />
+              </div>
+              <div className="space-y-4">
+                <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Resultado projetado</p>
+                  <div className="mt-4 text-3xl font-extrabold tracking-tight text-slate-950">
+                    <SensitiveValue hidden={privacyMode}>{formatCurrency(data.projected_net)}</SensitiveValue>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Com base na receita prevista, nas despesas, retiradas e parcelas da competência.
+                  </p>
                 </div>
-                <small>{formatNumber(week.score)} pontos</small>
-              </article>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
 
-      <div className="dashboard-grid">
-        <SectionCard title="Despesas por categoria" subtitle="Distribuicao da competencia atual.">
-          <HorizontalBarChart items={data.expenses_by_category || []} />
-        </SectionCard>
+                <div className="rounded-[28px] border border-slate-200 bg-white p-5">
+                  <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Distribuição por categoria</h4>
+                  <div className="mt-4">
+                    <HorizontalBarChart items={data.expenses_by_category || []} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
 
-        <SectionCard title="Evolucao consolidada" subtitle="Receitas, despesas e parcelas previstas.">
-          <TrendLines items={data.evolution || []} />
-        </SectionCard>
-      </div>
+          <TabsContent value="categories">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-4">
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data.expenses_by_category || []}
+                        dataKey="total"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={110}
+                        paddingAngle={4}
+                      >
+                        {(data.expenses_by_category || []).map((entry, index) => (
+                          <Cell key={entry.name} fill={categoryColors[index % categoryColors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => formatCurrency(value)}
+                        contentStyle={{
+                          borderRadius: 18,
+                          borderColor: '#d0d5dd',
+                          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.12)',
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
 
-      <SectionCard title="Parcelas previstas na competencia" subtitle="Snapshot para validacao da camada React.">
+              <div className="space-y-3">
+                {(data.expenses_by_category || []).slice(0, 6).map((item, index) => (
+                  <article key={item.name} className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="h-3.5 w-3.5 rounded-full"
+                          style={{ backgroundColor: categoryColors[index % categoryColors.length] }}
+                        />
+                        <div>
+                          <strong className="text-sm font-semibold text-slate-950">{item.name}</strong>
+                          <p className="text-xs text-slate-500">Despesa da competência atual</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900">
+                        <SensitiveValue hidden={privacyMode}>{formatCurrency(item.total)}</SensitiveValue>
+                      </span>
+                    </div>
+                  </article>
+                ))}
+                {(data.expenses_by_category || []).length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                    Sem despesas categorizadas na competência atual.
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="score">
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+              <div className="rounded-[28px] border border-slate-200 bg-white p-4">
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={weeklyHistory} margin={{ top: 12, right: 18, left: 6, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                      <XAxis dataKey="week_label" tick={{ fill: '#475467', fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: '#475467', fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        formatter={(value) => `${value} pts`}
+                        contentStyle={{
+                          borderRadius: 18,
+                          borderColor: '#d0d5dd',
+                          boxShadow: '0 12px 28px rgba(15, 23, 42, 0.12)',
+                        }}
+                      />
+                      <Bar dataKey="score" radius={[12, 12, 4, 4]}>
+                        {weeklyHistory.map((item, index) => (
+                          <Cell key={item.week_start} fill={item.fill || weeklyColors[index % weeklyColors.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="rounded-[28px] border border-slate-200 bg-slate-950 p-5 text-white">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Score atual</p>
+                  <p className="mt-4 text-5xl font-extrabold tracking-tight">{formatNumber(weeklyCurrent.score || 0)}</p>
+                  <p className="mt-2 text-sm text-slate-300">{weeklyCurrent.classification_label || 'Sem classificação'}</p>
+                </div>
+
+                <div className="rounded-[28px] border border-slate-200 bg-white p-5">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <CalendarClock className="h-4 w-4 text-primary" />
+                    Semana atual
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                      <p className="text-xs text-slate-500">Concluídas</p>
+                      <p className="mt-2 text-2xl font-bold text-slate-950">{formatNumber(weeklyCurrent.completed_count || 0)}</p>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                      <p className="text-xs text-slate-500">Previstas</p>
+                      <p className="mt-2 text-2xl font-bold text-slate-950">{formatNumber(weeklyCurrent.planned_count || 0)}</p>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                      <p className="text-xs text-slate-500">Taxa</p>
+                      <p className="mt-2 text-2xl font-bold text-slate-950">{formatPercent(weeklyCurrent.completion_rate || 0)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </SectionCard>
+
+      <SectionCard
+        title="Parcelas previstas na competência"
+        subtitle="Tabela com melhor leitura para validar o frontend novo sem alterar as regras de cobrança."
+      >
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Divida</th>
+                <th>Dívida</th>
                 <th>Parcela</th>
                 <th>Vencimento</th>
                 <th>Valor</th>
@@ -255,27 +576,33 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {(data.installment_details || []).slice(0, 8).map((item) => (
+              {(data.installment_details || []).slice(0, 10).map((item) => (
                 <tr key={`${item.debt_id}-${item.installment_number}`}>
-                  <td>{item.debt_description}</td>
+                  <td>
+                    <strong>{item.debt_description}</strong>
+                  </td>
                   <td>#{item.installment_number}</td>
                   <td>{formatDate(item.due_date)}</td>
-                  <td className={privateClass}>{formatCurrency(item.amount)}</td>
-                  <td className={privateClass}>{formatCurrency(item.paid_amount)}</td>
-                  <td className={privateClass}>{formatCurrency(item.remaining_amount)}</td>
+                  <td><SensitiveValue hidden={privacyMode}>{formatCurrency(item.amount)}</SensitiveValue></td>
+                  <td><SensitiveValue hidden={privacyMode}>{formatCurrency(item.paid_amount)}</SensitiveValue></td>
+                  <td><SensitiveValue hidden={privacyMode}>{formatCurrency(item.remaining_amount)}</SensitiveValue></td>
                 </tr>
               ))}
-
               {(data.installment_details || []).length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="empty-cell">Sem parcelas previstas para esta competencia.</td>
+                  <td colSpan="6" className="empty-cell">Sem parcelas previstas para esta competência.</td>
                 </tr>
               ) : null}
             </tbody>
           </table>
         </div>
       </SectionCard>
+
+      {error ? (
+        <div className="alert-banner alert-banner--danger">
+          {error}
+        </div>
+      ) : null}
     </div>
   );
 }
-

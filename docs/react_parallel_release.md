@@ -14,6 +14,7 @@
   - fonte React/Vite em `frontend/newrelease`;
   - build estatico em `public_html/newrelease`;
   - API PHP em `public_html/api`.
+  - UI evoluida com Tailwind CSS, componentes base no estilo shadcn/ui e graficos em Recharts para o dashboard.
 
 ## Estrutura segura aplicada
 ```text
@@ -54,6 +55,7 @@ project-root/
 - O React consome a API com `credentials: include`.
 - `GET /api/me` entrega `csrf_token` para login/logout via frontend React.
 - `current_user_id()` e escopo admin continuam sendo resolvidos no backend.
+- A camada React usa design tokens locais, componentes reutilizaveis e graficos leves, sem mover logica de negocio para o frontend.
 
 ## Build e publicacao
 - Desenvolvimento local:

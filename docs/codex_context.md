@@ -23,7 +23,7 @@
 - Backend: PHP puro.
 - Banco: MySQL/MariaDB via PDO.
 - Frontend: PHP views + Tailwind CSS via CDN + Chart.js via CDN.
-- Frontend paralelo de migracao: React 19 + React Router 7 + Vite 8, com build local e deploy estatico em subpasta.
+- Frontend paralelo de migracao: React 19 + React Router 7 + Vite 8, com Tailwind CSS 3, primitives no estilo shadcn/ui e graficos em Recharts; build local e deploy estatico em subpasta.
 - Servidor local observado: XAMPP (`C:\xampp`), `php.exe` em `C:\xampp\php\php.exe`.
 - Composer: nao utilizado no projeto.
 
@@ -65,7 +65,7 @@
 - Release React paralela (`newrelease`):
   - layout base com navegacao protegida;
   - login React consumindo sessao PHP;
-  - dashboard React com resumo financeiro, central de execucao, agenda, score semanal e modo privacidade;
+  - dashboard React com resumo financeiro, central de execucao, agenda, score semanal, modo privacidade e nova hierarquia visual SaaS baseada em cards, contrastes fortes e graficos leves;
   - paginas iniciais para `accounts`, `categories`, `transactions`, `targets` e `agenda`.
 - API JSON paralela (`api`):
   - endpoints iniciais para autenticacao, sessao, dashboard, contas, categorias, transacoes e resumo de execucao;
@@ -197,7 +197,7 @@
 - `PDO::ATTR_EMULATE_PREPARES = false` (placeholders devem ser tratados com cuidado).
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
-- Frontend React usa `fetch` com `credentials: include`, Router em subpasta e build estatico com `base=/newrelease/`.
+- Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui e build estatico com `base=/newrelease/`.
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.
 - Dashboard com fallback de resiliencia por bloco (queries criticas encapsuladas com `try/catch` e `error_log`) para evitar HTTP 500 por divergencia pontual de schema/dados em producao.
