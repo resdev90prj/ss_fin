@@ -11,7 +11,7 @@
 - Score de Execucao Semanal implementado no dashboard com comparacao semanal e historico de evolucao.
 - Central de Alertas implementada com envio de digest por e-mail e arquitetura desacoplada pronta para futuro provider de WhatsApp.
 - Modo Privacidade Visual implementado no dashboard para ocultar rapidamente valores financeiros em tela.
-- Contexto atualizado em: 2026-03-31.
+- Contexto atualizado em: 2026-04-01.
 
 ## Objetivo do sistema
 - Centralizar fluxo financeiro PF/PJ com visao operacional e analitica.
@@ -67,10 +67,10 @@
   - menu React reorganizado por dominios (`Visao geral`, `Financeiro`, `Planejamento`, `Operacao`, `Analise`, `Conta` e `Admin` quando aplicavel), espelhando o mapa funcional do legado para evitar regressao de produto;
   - login React consumindo sessao PHP;
   - dashboard React com resumo financeiro, central de execucao, agenda, score semanal, modo privacidade e nova hierarquia visual SaaS baseada em cards, contrastes fortes e graficos leves;
-  - paginas iniciais para `accounts`, `categories`, `transactions`, `targets` e `agenda`;
-  - placeholders com ponte para o legado em modulos ainda nao migrados (`boxes`, `withdrawals`, `debts`, `budgets`, `goals`, `imports`, `reports`, `profile` e `users` para admin).
+  - modulos com fluxo funcional em React para `accounts`, `boxes`, `categories`, `transactions`, `withdrawals`, `debts`, `budgets`, `goals`, `targets`, `agenda`, `imports`, `reports`, `profile` e `users` (admin), cobrindo leitura e principais acoes operacionais sem sair de `/newrelease`;
+  - experiencia da nova release sem botao "abrir no legado", sem redirects para views PHP antigas e sem placeholders de navegacao para os itens presentes no menu.
 - API JSON paralela (`api`):
-  - endpoints iniciais para autenticacao, sessao, dashboard, contas, categorias, transacoes e resumo de execucao;
+  - endpoints para autenticacao, sessao, dashboard, contas, caixas, categorias, transacoes, orcamentos, metas, relatorios, importacoes, dividas, perfil do usuario e administracao de usuarios;
   - resposta padronizada `{ success, message, data, errors }`;
   - middleware proprio baseado na mesma sessao PHP do legado.
 - Agenda (`agenda_execution`): tela expandida da execucao diaria com ordenacao automatica das acoes abertas do usuario.
@@ -105,8 +105,6 @@
   - guia objetivo de migracao em `deploy/README_HOSTINGER.md`.
 
 ## Modulos parciais
-- Gestao de usuarios/perfis alem login basico: completo no escopo admin/user.
-- Edicao em alguns modulos via UI: parcial (ha casos com acao existente e UX limitada).
 - Testes automatizados: inexistente no repositorio.
 
 ## Modulos pendentes
@@ -127,6 +125,7 @@
   - admin pode operar em escopo proprio ou em escopo de outro usuario (contexto de visualizacao), sem trocar identidade de login.
 - Acoes de escrita em modulos financeiros validam propriedade de referencias (`account_id`, `category_id`, `box_id`) para evitar IDOR indireto.
 - A release React usa a mesma sessao do legado com `credentials: include`; permissoes continuam no backend e nunca no frontend.
+- A nova release React deve entregar experiencia continua em `/newrelease`; se um modulo aparece no menu, seu fluxo principal precisa existir dentro da propria interface, sem redirecionamento para o legado.
 - `GET /api/me` entrega `csrf_token` para operacoes React de login/logout sem quebrar a estrategia atual de CSRF por sessao.
 - Acoes mutaveis exigem CSRF na maior parte dos formularios.
 - Categorias:
@@ -199,8 +198,8 @@
 - `PDO::ATTR_EMULATE_PREPARES = false` (placeholders devem ser tratados com cuidado).
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
-- Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui e build estatico com `base=/newrelease/`.
-- Cada item relevante do menu legado agora possui rota correspondente no React; quando a tela ainda nao foi migrada, a rota React funciona como placeholder de navegacao e ponte explicita para o modulo PHP existente.
+- Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui, lazy loading por rota e build estatico com `base=/newrelease/`.
+- Cada item relevante do menu da nova release deve possuir rota funcional no React; bridges, redirects e placeholders para modulos do legado nao fazem parte da experiencia final esperada.
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.
 - Dashboard com fallback de resiliencia por bloco (queries criticas encapsuladas com `try/catch` e `error_log`) para evitar HTTP 500 por divergencia pontual de schema/dados em producao.
@@ -290,9 +289,8 @@
 - Implementar provider real de WhatsApp quando credenciais/API estiverem definidas.
 
 ## Proximos passos sugeridos
-1. Validar login, logout, assets e navegacao da release React em `/newrelease` com usuarios internos.
-2. Restringir acesso inicial ao piloto React (admin/IP/lista controlada) antes da abertura ampla.
-3. Evoluir a API paralela com endpoints de escrita para os modulos que passarem na validacao de leitura.
-4. Criar checklist de regressao manual por modulo critico (dividas, transacoes, importacao).
-5. Definir rotina cron para `includes/process_ofx_queue.php` e `includes/process_alerts.php`.
-6. Iniciar suite minima de testes para regras de divida, deduplicacao OFX, notificacoes e API paralela.
+1. Executar regressao manual fim a fim dos modulos React migrados, com foco em transacoes, contas, categorias, caixas, importacao e dividas.
+2. Validar cobertura de CSRF e autorizacao para todas as rotas mutaveis novas da API paralela.
+3. Avaliar code splitting do bundle React para reduzir o chunk principal gerado pelo Vite.
+4. Definir rotina cron para `includes/process_ofx_queue.php` e `includes/process_alerts.php`.
+5. Iniciar suite minima de testes para regras de divida, deduplicacao OFX, notificacoes e API paralela.

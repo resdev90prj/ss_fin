@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
   Activity,
-  ArrowUpRight,
   ChevronDown,
   ChevronRight,
   Menu,
@@ -31,14 +30,6 @@ function routeIsActive(pathname, itemPath) {
 }
 
 function statusPill(item) {
-  if (item.status === 'bridge') {
-    return (
-      <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700">
-        PHP
-      </span>
-    );
-  }
-
   if (item.status === 'action') {
     return (
       <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-700">
@@ -49,7 +40,7 @@ function statusPill(item) {
 
   return (
     <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
-      React
+      Ativo
     </span>
   );
 }
@@ -166,17 +157,17 @@ export default function AppShell() {
       <aside className="hidden min-h-screen border-r border-slate-200/80 bg-slate-950 px-5 py-6 text-white lg:flex lg:flex-col">
         <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
           <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
-            Parallel release
+            Workspace financeiro
           </span>
           <h1 className="mt-4 font-display text-3xl tracking-tight">{session.release?.app_name || 'SaaS IA Finan'}</h1>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            Mapa completo do produto refletido na nova navegacao, sem esconder capacidades do legado.
+            Experiencia completa do produto concentrada em uma navegacao unica, mais clara e mais moderna.
           </p>
         </div>
 
         <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-slate-300">
           <Activity className="h-4 w-4 text-blue-300" />
-          Migracao funcional em paralelo
+          Operacao unificada com API PHP
         </div>
 
         <nav className="mt-6 flex-1 space-y-4 overflow-y-auto pr-1" aria-label="Principal">
@@ -193,9 +184,9 @@ export default function AppShell() {
         </nav>
 
         <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-5">
-          <strong className="text-sm font-semibold text-white">Paridade primeiro</strong>
+          <strong className="text-sm font-semibold text-white">Produto continuo</strong>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Modulos ainda nao migrados seguem no menu com rota propria e ponte clara para o PHP.
+            Todos os modulos do menu ficam acessiveis dentro da mesma experiencia, com regras sensiveis mantidas no backend.
           </p>
         </div>
       </aside>
@@ -216,7 +207,7 @@ export default function AppShell() {
                 </Button>
 
                 <div>
-                  <span className="hero-card__eyebrow">New release / full product map</span>
+                  <span className="hero-card__eyebrow">Workspace financeiro</span>
                   <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-950">
                     {currentModule.label}
                   </h2>
@@ -231,16 +222,9 @@ export default function AppShell() {
                   <strong className="block text-sm font-semibold text-slate-950">{currentUser?.name || 'Usuario'}</strong>
                   <span className="text-xs text-slate-500">
                     {currentUser?.role === 'admin' ? 'Admin' : 'User'}
-                    {scope.scoped_user_id ? ` | Escopo ${scope.current_user_id}` : ''}
+                    {scope.scoped_user_id ? ` | Escopo ${scope.scoped_user_id}` : ''}
                   </span>
                 </div>
-
-                <Button asChild variant="outline">
-                  <a href={session.release?.legacy_base || '/'} target="_self" rel="noreferrer">
-                    Abrir legado
-                    <ArrowUpRight className="h-4 w-4" />
-                  </a>
-                </Button>
               </div>
             </div>
 

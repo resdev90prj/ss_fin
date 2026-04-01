@@ -7,11 +7,6 @@ export function getApiBase() {
   return url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname;
 }
 
-export function getLegacyBase() {
-  const url = new URL('../', absoluteBaseUrl());
-  return url.pathname;
-}
-
 function buildUrl(path, data) {
   const apiBase = getApiBase();
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
@@ -31,7 +26,13 @@ function buildUrl(path, data) {
 }
 
 export async function apiRequest(path, options = {}) {
-  const { method = 'GET', data, signal } = options;
+  const {
+    method = 'GET',
+    data,
+    signal,
+    formData,
+    headers: customHeaders = {},
+  } = options;
   const upperMethod = method.toUpperCase();
   const url = buildUrl(path, upperMethod === 'GET' ? data : undefined);
 
@@ -40,13 +41,18 @@ export async function apiRequest(path, options = {}) {
     credentials: 'include',
     headers: {
       Accept: 'application/json',
+      ...customHeaders,
     },
     signal,
   };
 
   if (upperMethod !== 'GET') {
-    requestOptions.headers['Content-Type'] = 'application/json';
-    requestOptions.body = JSON.stringify(data ?? {});
+    if (formData instanceof FormData) {
+      requestOptions.body = formData;
+    } else {
+      requestOptions.headers['Content-Type'] = 'application/json';
+      requestOptions.body = JSON.stringify(data ?? {});
+    }
   }
 
   const response = await fetch(url, requestOptions);
@@ -67,4 +73,3 @@ export async function apiRequest(path, options = {}) {
 
   return payload;
 }
-

@@ -201,6 +201,16 @@ function api_require_login(): array
     return $user;
 }
 
+function api_require_admin(): array
+{
+    $user = api_require_login();
+    if (!is_admin()) {
+        api_json_response(false, 'Acesso restrito ao administrador.', [], ['Permissao insuficiente para esta operacao.'], 403);
+    }
+
+    return $user;
+}
+
 function api_verify_csrf_or_fail(?string $token): void
 {
     if (!verify_csrf($token)) {
@@ -230,7 +240,6 @@ function api_session_payload(): array
         ],
         'release' => [
             'app_name' => (string)($config['app_name'] ?? 'SaaS IA Finan'),
-            'legacy_base' => '/',
             'react_base' => '/newrelease',
             'api_base' => '/api',
         ],

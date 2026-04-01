@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { apiRequest, getLegacyBase } from '../lib/apiClient';
+import { apiRequest } from '../lib/apiClient';
 
 const emptySession = {
   authenticated: false,
@@ -13,7 +13,6 @@ const emptySession = {
   },
   release: {
     app_name: 'SaaS IA Finan',
-    legacy_base: getLegacyBase(),
     react_base: '/newrelease',
     api_base: '/api',
   },

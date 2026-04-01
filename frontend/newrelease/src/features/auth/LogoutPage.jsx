@@ -27,7 +27,7 @@ export default function LogoutPage() {
 
   return (
     <div className="fullscreen-center">
-      <LoadingState title="Encerrando sessao" text="Limpando a sessao da nova release com seguranca." />
+      <LoadingState title="Encerrando sessao" text="Limpando a sessao atual com seguranca." />
     </div>
   );
 }

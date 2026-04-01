@@ -27,7 +27,7 @@ export default function LoginPage() {
       const errors = Array.isArray(requestError.errors) && requestError.errors.length > 0
         ? requestError.errors.join(' ')
         : requestError.message;
-      setError(errors || 'Nao foi possivel autenticar na nova release.');
+      setError(errors || 'Nao foi possivel autenticar.');
     } finally {
       setBusy(false);
     }
@@ -37,25 +37,25 @@ export default function LoginPage() {
     <div className="login-layout">
       <section className="login-panel login-panel--highlight">
         <div>
-          <span className="login-kicker">New release / React pilot</span>
-          <h1>Validacao segura da nova interface sem trocar o legado</h1>
+          <span className="login-kicker">Workspace financeiro</span>
+          <h1>Entre no seu workspace financeiro com a mesma seguranca do backend atual</h1>
           <p>
-            Esta release usa a mesma sessao PHP, a mesma seguranca por user_id e os
-            mesmos models do sistema atual. O frontend mudou; as regras criticas nao.
+            Esta experiencia usa a mesma sessao PHP, o mesmo isolamento por user_id e
+            as mesmas regras criticas do sistema. A interface mudou; a protecao permanece.
           </p>
 
           <div className="feature-stack">
             <article>
-              <strong>Rota isolada</strong>
-              <p>O piloto roda em /newrelease sem tocar o fluxo principal em /.</p>
+              <strong>Experiencia unificada</strong>
+              <p>Os principais modulos operam dentro da mesma interface, sem depender de saltos para outra tela.</p>
             </article>
             <article>
               <strong>API em PHP</strong>
-              <p>Os endpoints JSON reaproveitam autenticacao, permissao e sessao do sistema atual.</p>
+              <p>Os endpoints JSON reaproveitam autenticacao, permissao, sessao e regras de negocio do sistema atual.</p>
             </article>
             <article>
-              <strong>Rollback simples</strong>
-              <p>Se houver qualquer problema, basta manter os usuarios no legado enquanto a nova release evolui.</p>
+              <strong>Fluxo consistente</strong>
+              <p>Dashboard, financeiro, operacao e conta compartilham a mesma navegacao e a mesma identidade visual.</p>
             </article>
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function LoginPage() {
       <section className="login-panel">
         <div className="login-card">
           <span className="login-kicker">Acesso controlado</span>
-          <h2>Entrar na nova release</h2>
+          <h2>Entrar</h2>
           <p>Use suas credenciais atuais. A autenticacao continua centralizada no PHP.</p>
 
           {(error || authError) && (
@@ -99,7 +99,7 @@ export default function LoginPage() {
             </label>
 
             <button className="solid-button solid-button--wide" type="submit" disabled={busy}>
-              {busy ? 'Validando acesso...' : 'Entrar no piloto React'}
+              {busy ? 'Validando acesso...' : 'Entrar'}
             </button>
           </form>
         </div>
@@ -107,4 +107,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

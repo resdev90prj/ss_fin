@@ -27,7 +27,6 @@ export const moduleRegistry = {
     icon: LayoutDashboard,
     status: 'live',
     description: 'Resumo financeiro, alertas, agenda e score semanal.',
-    legacyRoute: 'dashboard',
   },
   accounts: {
     key: 'accounts',
@@ -38,7 +37,6 @@ export const moduleRegistry = {
     icon: WalletCards,
     status: 'live',
     description: 'Cadastro e status das contas financeiras do usuario.',
-    legacyRoute: 'accounts',
   },
   boxes: {
     key: 'boxes',
@@ -47,9 +45,8 @@ export const moduleRegistry = {
     shortLabel: 'Caixas',
     group: 'finance',
     icon: Vault,
-    status: 'bridge',
-    description: 'Caixas e vinculos operacionais ainda preservados no legado.',
-    legacyRoute: 'boxes',
+    status: 'live',
+    description: 'Caixas, saldos dedicados e vinculos operacionais no mesmo workspace.',
   },
   categories: {
     key: 'categories',
@@ -60,7 +57,6 @@ export const moduleRegistry = {
     icon: Shapes,
     status: 'live',
     description: 'Categorias padrao e personalizadas protegidas por user_id.',
-    legacyRoute: 'categories',
   },
   transactions: {
     key: 'transactions',
@@ -71,7 +67,6 @@ export const moduleRegistry = {
     icon: ArrowLeftRight,
     status: 'live',
     description: 'Receitas e despesas consolidadas em uma experiencia unica.',
-    legacyRoute: 'transactions',
   },
   withdrawals: {
     key: 'withdrawals',
@@ -80,9 +75,8 @@ export const moduleRegistry = {
     shortLabel: 'Retiradas',
     group: 'finance',
     icon: CircleDollarSign,
-    status: 'bridge',
-    description: 'Lancamentos de retirada seguem disponiveis no modulo PHP atual.',
-    legacyRoute: 'withdrawals',
+    status: 'live',
+    description: 'Retiradas do socio registradas e geridas na mesma experiencia.',
   },
   debts: {
     key: 'debts',
@@ -91,9 +85,8 @@ export const moduleRegistry = {
     shortLabel: 'Dividas',
     group: 'finance',
     icon: Landmark,
-    status: 'bridge',
-    description: 'Gestao de dividas e parcelas ainda roda no fluxo legado.',
-    legacyRoute: 'debts',
+    status: 'live',
+    description: 'Dividas parceladas, pagamentos, estornos e exclusoes condicionadas.',
   },
   budgets: {
     key: 'budgets',
@@ -102,9 +95,8 @@ export const moduleRegistry = {
     shortLabel: 'Orcamentos',
     group: 'planning',
     icon: PiggyBank,
-    status: 'bridge',
-    description: 'Limites mensais por categoria continuam ativos no backend PHP.',
-    legacyRoute: 'budgets',
+    status: 'live',
+    description: 'Limites mensais por categoria com manutencao direta na interface.',
   },
   goals: {
     key: 'goals',
@@ -113,9 +105,8 @@ export const moduleRegistry = {
     shortLabel: 'Metas',
     group: 'planning',
     icon: Goal,
-    status: 'bridge',
-    description: 'Metas financeiras seguem disponiveis no legado enquanto a UI React evolui.',
-    legacyRoute: 'goals',
+    status: 'live',
+    description: 'Metas financeiras com progresso, ajuste e acompanhamento continuo.',
   },
   targets: {
     key: 'targets',
@@ -126,7 +117,6 @@ export const moduleRegistry = {
     icon: Rocket,
     status: 'live',
     description: 'Plano ativo, proximas acoes, score e inteligencia de execucao.',
-    legacyRoute: 'targets',
   },
   agenda: {
     key: 'agenda',
@@ -137,7 +127,6 @@ export const moduleRegistry = {
     icon: CalendarClock,
     status: 'live',
     description: 'Agenda priorizada a partir das regras atuais do backend.',
-    legacyRoute: 'agenda_execution',
   },
   imports: {
     key: 'imports',
@@ -146,9 +135,8 @@ export const moduleRegistry = {
     shortLabel: 'Importacao',
     group: 'operations',
     icon: Upload,
-    status: 'bridge',
-    description: 'Upload e processamento de importacao continuam disponiveis no fluxo PHP.',
-    legacyRoute: 'imports',
+    status: 'live',
+    description: 'Upload manual e fila OFX operando dentro do proprio modulo.',
   },
   reports: {
     key: 'reports',
@@ -157,9 +145,8 @@ export const moduleRegistry = {
     shortLabel: 'Relatorios',
     group: 'analysis',
     icon: Archive,
-    status: 'bridge',
-    description: 'Analises e visoes consolidadas seguem acessiveis no modulo legado.',
-    legacyRoute: 'reports',
+    status: 'live',
+    description: 'Relatorios consolidados com filtros e resultado liquido do periodo.',
   },
   profile: {
     key: 'profile',
@@ -168,9 +155,8 @@ export const moduleRegistry = {
     shortLabel: 'Meu acesso',
     group: 'account',
     icon: UserRound,
-    status: 'bridge',
-    description: 'Dados do usuario e troca de senha continuam preservados no backend atual.',
-    legacyRoute: 'profile',
+    status: 'live',
+    description: 'Dados pessoais, senha e preferencias da central de alertas.',
   },
   users: {
     key: 'users',
@@ -179,9 +165,8 @@ export const moduleRegistry = {
     shortLabel: 'Usuarios',
     group: 'admin',
     icon: Users,
-    status: 'bridge',
-    description: 'Modulo administrativo existente no legado e mantido para contas admin.',
-    legacyRoute: 'users',
+    status: 'live',
+    description: 'Gestao administrativa de usuarios, senha, status e escopo.',
     adminOnly: true,
   },
   logout: {
@@ -192,7 +177,7 @@ export const moduleRegistry = {
     group: 'account',
     icon: LogOut,
     status: 'action',
-    description: 'Encerrar a sessao atual da release React.',
+    description: 'Encerrar a sessao atual.',
   },
 };
 
@@ -223,30 +208,4 @@ export function getNavigationGroups({ isAdmin = false } = {}) {
       }),
     }))
     .filter((group) => group.items.length > 0);
-}
-
-export function getBridgeModules({ isAdmin = false } = {}) {
-  return Object.values(moduleRegistry).filter((item) => {
-    if (item.status !== 'bridge') {
-      return false;
-    }
-
-    if (item.adminOnly && !isAdmin) {
-      return false;
-    }
-
-    return true;
-  });
-}
-
-export function buildLegacyHref(basePath = '/', route = '') {
-  const normalizedBase = String(basePath || '/').endsWith('/')
-    ? String(basePath || '/')
-    : `${String(basePath || '/')}/`;
-
-  if (!route) {
-    return normalizedBase;
-  }
-
-  return `${normalizedBase}index.php?route=${route}`;
 }

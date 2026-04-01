@@ -349,7 +349,7 @@ export default function DashboardPage() {
               <Target className="mx-auto h-8 w-8 text-slate-400" />
               <h3 className="mt-4 text-lg font-semibold text-slate-900">Nenhum alvo ativo no momento</h3>
               <p className="mt-2 text-sm text-slate-600">
-                Quando um alvo for ativado no legado, esta área passa a destacar automaticamente progresso, prioridades e risco.
+                Quando um alvo for ativado, esta area passa a destacar automaticamente progresso, prioridades e risco.
               </p>
             </div>
           )}

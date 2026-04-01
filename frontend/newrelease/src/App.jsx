@@ -1,17 +1,27 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import AppShell from './components/AppShell';
+import LoadingState from './components/LoadingState';
 import ProtectedRoute from './components/ProtectedRoute';
-import LoginPage from './features/auth/LoginPage';
-import LogoutPage from './features/auth/LogoutPage';
-import DashboardPage from './features/dashboard/DashboardPage';
-import AccountsPage from './features/accounts/AccountsPage';
-import CategoriesPage from './features/categories/CategoriesPage';
-import TransactionsPage from './features/transactions/TransactionsPage';
-import TargetsPage from './features/targets/TargetsPage';
-import AgendaPage from './features/agenda/AgendaPage';
-import ModulePlaceholderPage from './features/placeholders/ModulePlaceholderPage';
-import { moduleRegistry } from './navigation/menu';
+
+const LoginPage = lazy(() => import('./features/auth/LoginPage'));
+const LogoutPage = lazy(() => import('./features/auth/LogoutPage'));
+const DashboardPage = lazy(() => import('./features/dashboard/DashboardPage'));
+const AccountsPage = lazy(() => import('./features/accounts/AccountsPage'));
+const BoxesPage = lazy(() => import('./features/boxes/BoxesPage'));
+const CategoriesPage = lazy(() => import('./features/categories/CategoriesPage'));
+const TransactionsPage = lazy(() => import('./features/transactions/TransactionsPage'));
+const WithdrawalsPage = lazy(() => import('./features/withdrawals/WithdrawalsPage'));
+const DebtsPage = lazy(() => import('./features/debts/DebtsPage'));
+const BudgetsPage = lazy(() => import('./features/budgets/BudgetsPage'));
+const GoalsPage = lazy(() => import('./features/goals/GoalsPage'));
+const TargetsPage = lazy(() => import('./features/targets/TargetsPage'));
+const AgendaPage = lazy(() => import('./features/agenda/AgendaPage'));
+const ImportsPage = lazy(() => import('./features/imports/ImportsPage'));
+const ReportsPage = lazy(() => import('./features/reports/ReportsPage'));
+const ProfilePage = lazy(() => import('./features/profile/ProfilePage'));
+const UsersPage = lazy(() => import('./features/users/UsersPage'));
 
 const routerBase = import.meta.env.BASE_URL === '/'
   ? '/'
@@ -21,33 +31,41 @@ export default function App() {
   return (
     <BrowserRouter basename={routerBase}>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+        <Suspense
+          fallback={(
+            <div className="fullscreen-center">
+              <LoadingState text="Carregando modulo..." />
+            </div>
+          )}
+        >
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          <Route element={<ProtectedRoute />}>
-            <Route path="/logout" element={<LogoutPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/logout" element={<LogoutPage />} />
 
-            <Route element={<AppShell />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="/accounts" element={<AccountsPage />} />
-              <Route path="/boxes" element={<ModulePlaceholderPage module={moduleRegistry.boxes} />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/transactions" element={<TransactionsPage />} />
-              <Route path="/withdrawals" element={<ModulePlaceholderPage module={moduleRegistry.withdrawals} />} />
-              <Route path="/debts" element={<ModulePlaceholderPage module={moduleRegistry.debts} />} />
-              <Route path="/budgets" element={<ModulePlaceholderPage module={moduleRegistry.budgets} />} />
-              <Route path="/goals" element={<ModulePlaceholderPage module={moduleRegistry.goals} />} />
-              <Route path="/targets" element={<TargetsPage />} />
-              <Route path="/agenda" element={<AgendaPage />} />
-              <Route path="/imports" element={<ModulePlaceholderPage module={moduleRegistry.imports} />} />
-              <Route path="/reports" element={<ModulePlaceholderPage module={moduleRegistry.reports} />} />
-              <Route path="/profile" element={<ModulePlaceholderPage module={moduleRegistry.profile} />} />
-              <Route path="/users" element={<ModulePlaceholderPage module={moduleRegistry.users} />} />
+              <Route element={<AppShell />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="/accounts" element={<AccountsPage />} />
+                <Route path="/boxes" element={<BoxesPage />} />
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/transactions" element={<TransactionsPage />} />
+                <Route path="/withdrawals" element={<WithdrawalsPage />} />
+                <Route path="/debts" element={<DebtsPage />} />
+                <Route path="/budgets" element={<BudgetsPage />} />
+                <Route path="/goals" element={<GoalsPage />} />
+                <Route path="/targets" element={<TargetsPage />} />
+                <Route path="/agenda" element={<AgendaPage />} />
+                <Route path="/imports" element={<ImportsPage />} />
+                <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/users" element={<UsersPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -55,7 +55,7 @@ export default function AgendaPage() {
         <div>
           <span className="hero-card__eyebrow">Agenda de execucao</span>
           <h1>Ordenacao diaria para foco operacional</h1>
-          <p>Esta tela prova a coexistencia entre React e a regra atual de prioridade do PHP.</p>
+          <p>As prioridades diarias continuam centralizadas no backend e chegam prontas para a operacao.</p>
         </div>
       </section>
 
@@ -86,7 +86,7 @@ export default function AgendaPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Agenda completa" subtitle="Leitura detalhada para validacao do fluxo paralelo.">
+      <SectionCard title="Agenda completa" subtitle="Leitura detalhada das acoes abertas com a mesma ordenacao operacional do sistema.">
         <div className="table-wrap">
           <table className="data-table">
             <thead>

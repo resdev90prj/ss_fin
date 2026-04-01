@@ -57,7 +57,7 @@ export default function TargetsPage() {
         <div>
           <span className="hero-card__eyebrow">Alvos, objetivos e execucao</span>
           <h1>Resumo estrategico do plano atual</h1>
-          <p>O modulo React consome a mesma inteligencia de agenda, prioridades e score semanal criada no backend.</p>
+          <p>O modulo consome a mesma inteligencia de agenda, prioridades e score semanal criada no backend.</p>
         </div>
       </section>
 
@@ -120,4 +120,3 @@ export default function TargetsPage() {
     </div>
   );
 }
-

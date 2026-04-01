@@ -45,5 +45,84 @@ class ApiAccountController
             'summary' => $summary,
         ]);
     }
-}
 
+    public function store(): void
+    {
+        api_require_login();
+        $payload = api_request_data();
+        api_verify_csrf_or_fail($payload['csrf_token'] ?? $payload['_csrf'] ?? null);
+
+        $userId = api_current_effective_user_id();
+        $data = $this->validatedPayload($payload);
+        $data['user_id'] = $userId;
+
+        (new Account())->create($data);
+
+        api_json_response(true, 'Conta criada com sucesso.');
+    }
+
+    public function update(): void
+    {
+        api_require_login();
+        $payload = api_request_data();
+        api_verify_csrf_or_fail($payload['csrf_token'] ?? $payload['_csrf'] ?? null);
+
+        $userId = api_current_effective_user_id();
+        $id = (int)($payload['id'] ?? 0);
+        if ($id <= 0 || !(new Account())->find($id, $userId)) {
+            api_json_response(false, 'Conta nao encontrada.', [], ['Conta invalida para o usuario atual.'], 404);
+        }
+
+        $data = $this->validatedPayload($payload);
+        (new Account())->update($id, $userId, $data);
+
+        api_json_response(true, 'Conta atualizada com sucesso.');
+    }
+
+    public function toggle(): void
+    {
+        api_require_login();
+        $payload = api_request_data();
+        api_verify_csrf_or_fail($payload['csrf_token'] ?? $payload['_csrf'] ?? null);
+
+        $userId = api_current_effective_user_id();
+        $id = (int)($payload['id'] ?? 0);
+        if ($id <= 0 || !(new Account())->find($id, $userId)) {
+            api_json_response(false, 'Conta nao encontrada.', [], ['Conta invalida para o usuario atual.'], 404);
+        }
+
+        (new Account())->toggleStatus($id, $userId);
+
+        api_json_response(true, 'Status da conta atualizado com sucesso.');
+    }
+
+    private function validatedPayload(array $payload): array
+    {
+        $name = trim((string)($payload['name'] ?? ''));
+        $type = strtoupper(trim((string)($payload['type'] ?? 'PF')));
+        $institution = trim((string)($payload['institution'] ?? ''));
+        $status = $this->normalizeStatus((string)($payload['status'] ?? 'active'));
+        $initialBalance = (float)($payload['initial_balance'] ?? 0);
+
+        if ($name === '') {
+            api_json_response(false, 'Nome da conta obrigatorio.', [], ['Informe o nome da conta.'], 422);
+        }
+
+        if (!in_array($type, ['PF', 'PJ'], true)) {
+            api_json_response(false, 'Tipo de conta invalido.', [], ['Use PF ou PJ.'], 422);
+        }
+
+        return [
+            'name' => $name,
+            'type' => $type,
+            'institution' => $institution,
+            'initial_balance' => $initialBalance,
+            'status' => $status,
+        ];
+    }
+
+    private function normalizeStatus(string $status): string
+    {
+        return $status === 'inactive' ? 'inactive' : 'active';
+    }
+}

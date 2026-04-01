@@ -160,6 +160,10 @@
     @apply border-rose-200 bg-rose-50 text-rose-700;
   }
 
+  .alert-banner--success {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+  }
+
   .state-card {
     @apply flex items-center gap-4 rounded-[28px] border border-slate-200/80 bg-white/90 p-6 shadow-panel backdrop-blur;
   }

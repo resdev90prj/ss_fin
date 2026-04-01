@@ -15,6 +15,14 @@ class Budget extends Model
         return $stmt->fetchAll();
     }
 
+    public function find(int $id, int $userId): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM budgets WHERE id = :id AND user_id = :user_id LIMIT 1');
+        $stmt->execute(['id' => $id, 'user_id' => $userId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     public function upsert(array $data): bool
     {
         $sql = 'INSERT INTO budgets (user_id, category_id, month_ref, amount_limit)
