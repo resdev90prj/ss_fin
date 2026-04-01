@@ -284,8 +284,7 @@ export default function TransactionsPage() {
           <span className="hero-card__eyebrow">Transacoes</span>
           <h1>Controle receitas, despesas, retiradas e transferencias em um unico fluxo.</h1>
           <p>
-            A experiencia atual agora cobre cadastro, edicao, exclusao, filtros e
-            reclassificacao de "Outros gastos" dentro do mesmo fluxo operacional.
+            Cadastre lancamentos, aplique filtros e trate classificacoes pendentes no mesmo lugar.
           </p>
         </div>
       </section>
@@ -372,7 +371,7 @@ export default function TransactionsPage() {
 
       <SectionCard
         title={editingId ? 'Editar lancamento' : 'Novo lancamento'}
-        subtitle="Sugestao automatica de categoria continua rodando no backend com base no historico do proprio usuario."
+        subtitle="Descreva o lancamento e revise a sugestao de categoria antes de salvar."
       >
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" onSubmit={handleSubmit}>
           <label className="xl:col-span-2">

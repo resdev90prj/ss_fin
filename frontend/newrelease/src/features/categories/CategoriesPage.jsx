@@ -142,8 +142,7 @@ export default function CategoriesPage() {
           <span className="hero-card__eyebrow">Categorias</span>
           <h1>Organize a leitura do seu financeiro com uma base consistente e flexivel.</h1>
           <p>
-            A interface agora permite criar, editar e remover categorias customizadas,
-            mantendo o backend como fonte unica das validacoes e protecoes.
+            Crie categorias personalizadas e mantenha sua estrutura financeira organizada no dia a dia.
           </p>
         </div>
       </section>
@@ -163,7 +162,7 @@ export default function CategoriesPage() {
 
       <SectionCard
         title={editingId ? 'Editar categoria' : 'Nova categoria'}
-        subtitle="Categorias padrao seguem protegidas; categorias do usuario continuam isoladas por user_id."
+        subtitle="Cadastre categorias para receitas, despesas ou uso misto."
       >
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" onSubmit={handleSubmit}>
           <label className="xl:col-span-2">

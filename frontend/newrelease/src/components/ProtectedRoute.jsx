@@ -5,6 +5,7 @@ import LoadingState from './LoadingState';
 export default function ProtectedRoute() {
   const { loading, session } = useAuth();
   const location = useLocation();
+  const shouldPreserveFrom = location.pathname !== '/login' && location.pathname !== '/logout';
 
   if (loading) {
     return (
@@ -15,9 +16,8 @@ export default function ProtectedRoute() {
   }
 
   if (!session.authenticated) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace state={shouldPreserveFrom ? { from: location.pathname } : null} />;
   }
 
   return <Outlet />;
 }
-

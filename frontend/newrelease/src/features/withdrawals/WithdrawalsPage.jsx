@@ -192,8 +192,7 @@ export default function WithdrawalsPage() {
           <span className="hero-card__eyebrow">Retiradas</span>
           <h1>Registre pro-labore, distribuicao de lucro e retiradas operacionais sem sair do mesmo fluxo.</h1>
           <p>
-            O fluxo de retiradas agora roda dentro da mesma experiencia usando o mesmo
-            backend e as mesmas protecoes de ownership do sistema financeiro.
+            Mantenha o historico de retiradas organizado, com filtros, edicao e exclusao em um so lugar.
           </p>
         </div>
       </section>

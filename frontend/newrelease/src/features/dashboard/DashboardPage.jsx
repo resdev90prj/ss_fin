@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -102,7 +102,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return <LoadingState text="Montando o novo cockpit visual do seu dashboard financeiro." />;
+    return <LoadingState text="Organizando o panorama financeiro da sua competencia." />;
   }
 
   if (!data) {
@@ -132,13 +132,12 @@ export default function DashboardPage() {
     <div className="page-stack">
       <section className="hero-card bg-grid-slate">
         <div className="max-w-3xl">
-          <span className="hero-card__eyebrow">Dashboard Financeiro / New release</span>
+          <span className="hero-card__eyebrow">Visao geral</span>
           <h1 className="font-display text-4xl tracking-tight text-slate-950 md:text-5xl">
-            Leitura mais rápida, mais forte e mais estratégica do seu caixa.
+            Tenha uma leitura clara do caixa, das prioridades e do plano atual.
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
-            Mantive a mesma lógica do backend PHP e reorganizei a experiência para dar mais
-            protagonismo ao saldo, ao plano ativo e às ações que exigem resposta imediata.
+            Acompanhe saldo, resultado, alertas e proximas acoes em uma visao feita para apoiar decisoes do dia.
           </p>
         </div>
 
@@ -152,7 +151,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-slate-900">Modo privacidade</p>
-                <p className="text-xs text-slate-500">Oculta valores sem comprometer a navegação.</p>
+                <p className="text-xs text-slate-500">Oculta valores sem comprometer a navegaÃ§Ã£o.</p>
               </div>
               <div className="flex items-center gap-3">
                 {privacyMode ? <EyeOff className="h-4 w-4 text-slate-500" /> : <Eye className="h-4 w-4 text-slate-500" />}
@@ -216,7 +215,7 @@ export default function DashboardPage() {
         <StatCard
           label="Resultado"
           value={formatCurrency(data.projected_net)}
-          hint={Number(data.projected_net) >= 0 ? 'Competencia saudavel' : 'Atenção para o fluxo'}
+          hint={Number(data.projected_net) >= 0 ? 'Competencia saudavel' : 'AtenÃ§Ã£o para o fluxo'}
           tone={Number(data.projected_net) >= 0 ? 'positive' : 'danger'}
           privateValue
           hidden={privacyMode}
@@ -226,8 +225,8 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.85fr)]">
         <SectionCard
-          title="Central de execução"
-          subtitle="Agora com foco explícito no alvo ativo, no risco imediato e na hierarquia das próximas ações."
+          title="Central de execucao"
+          subtitle="Priorize o que pede resposta agora e acompanhe o avanco do plano ativo."
         >
           {planning.active_target ? (
             <div className="space-y-5">
@@ -257,7 +256,7 @@ export default function DashboardPage() {
                         <p className="mt-2 text-2xl font-bold text-white">{formatNumber(planning.pending_actions)}</p>
                       </div>
                       <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Concluídas</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">ConcluÃ­das</p>
                         <p className="mt-2 text-2xl font-bold text-white">{formatNumber(planning.done_actions)}</p>
                       </div>
                       <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
@@ -274,21 +273,21 @@ export default function DashboardPage() {
                   <div className="rounded-[26px] border border-rose-200 bg-rose-50 p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">
                       <AlertTriangle className="h-4 w-4" />
-                      Ações críticas
+                      AÃ§Ãµes crÃ­ticas
                     </div>
                     <p className="mt-4 text-4xl font-extrabold tracking-tight text-rose-800">{priorityCounts.critical || 0}</p>
-                    <p className="mt-2 text-sm text-rose-700">Itens atrasados ou já pressionando a execução.</p>
+                    <p className="mt-2 text-sm text-rose-700">Itens atrasados ou jÃ¡ pressionando a execuÃ§Ã£o.</p>
                   </div>
 
                   <div className="rounded-[26px] border border-blue-200 bg-blue-50 p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
                       <Goal className="h-4 w-4" />
-                      Prioridade tática
+                      Prioridade tÃ¡tica
                     </div>
                     <p className="mt-4 text-4xl font-extrabold tracking-tight text-blue-800">
                       {(priorityCounts.high || 0) + (priorityCounts.medium || 0)}
                     </p>
-                    <p className="mt-2 text-sm text-blue-700">Ações para hoje e próximos dias.</p>
+                    <p className="mt-2 text-sm text-blue-700">AÃ§Ãµes para hoje e prÃ³ximos dias.</p>
                   </div>
                 </div>
               </div>
@@ -296,7 +295,7 @@ export default function DashboardPage() {
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Atenção imediata</h4>
+                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">AtenÃ§Ã£o imediata</h4>
                     <Badge variant="danger">{formatNumber((executionCenter.immediate_attention || []).length)} itens</Badge>
                   </div>
                   {(executionCenter.immediate_attention || []).slice(0, 4).map((action) => (
@@ -309,21 +308,21 @@ export default function DashboardPage() {
                         <Badge variant={urgencyBadge(action.urgency_text)}>{action.priority_label}</Badge>
                       </div>
                       <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                        <span>{action.urgency_text || 'Sem urgência'}</span>
+                        <span>{action.urgency_text || 'Sem urgÃªncia'}</span>
                         <span>{formatDate(action.planned_date)}</span>
                       </div>
                     </article>
                   ))}
                   {(executionCenter.immediate_attention || []).length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                      Nenhuma ação crítica agora. A execução está sob controle.
+                      Nenhuma aÃ§Ã£o crÃ­tica agora. A execuÃ§Ã£o estÃ¡ sob controle.
                     </div>
                   ) : null}
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Próximas ações</h4>
+                    <h4 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">PrÃ³ximas aÃ§Ãµes</h4>
                     <Badge variant="info">{formatNumber((executionCenter.next_actions || []).length)} mapeadas</Badge>
                   </div>
                   {(executionCenter.next_actions || []).slice(0, 4).map((action) => (
@@ -331,12 +330,12 @@ export default function DashboardPage() {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <strong className="text-sm font-semibold text-slate-950">{action.title}</strong>
-                          <p className="mt-1 text-sm text-slate-600">{action.decision_title || 'Sem decisão'}</p>
+                          <p className="mt-1 text-sm text-slate-600">{action.decision_title || 'Sem decisÃ£o'}</p>
                         </div>
                         <Badge variant={urgencyBadge(action.urgency_text)}>{action.priority_label}</Badge>
                       </div>
                       <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                        <span>{action.urgency_text || 'Sem urgência'}</span>
+                        <span>{action.urgency_text || 'Sem urgÃªncia'}</span>
                         <span>{formatDate(action.planned_date)}</span>
                       </div>
                     </article>
@@ -360,7 +359,7 @@ export default function DashboardPage() {
 
           <SectionCard
             title="Agenda de hoje"
-            subtitle="Prioridade de execução com leitura mais rápida por urgência."
+            subtitle="Itens priorizados para orientar o foco do dia."
             action={<Badge variant="outline">{formatNumber(agendaSummary.total || 0)} itens</Badge>}
           >
             <div className="grid gap-3 sm:grid-cols-2">
@@ -380,19 +379,19 @@ export default function DashboardPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <strong className="text-sm font-semibold text-slate-950">{item.title}</strong>
-                      <p className="mt-1 text-sm text-slate-600">{item.objective_title || 'Sem objetivo'} • {item.target_title || 'Sem alvo'}</p>
+                      <p className="mt-1 text-sm text-slate-600">{item.objective_title || 'Sem objetivo'} â€¢ {item.target_title || 'Sem alvo'}</p>
                     </div>
                     <Badge variant={urgencyBadge(item.urgency_text || item.priority_label)}>{item.priority_label}</Badge>
                   </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                    <span>{item.urgency_text || 'Sem urgência'}</span>
+                    <span>{item.urgency_text || 'Sem urgÃªncia'}</span>
                     <span>{formatDate(item.planned_date)}</span>
                   </div>
                 </article>
               ))}
               {(agenda.focus_items || []).length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                  Nenhum foco crítico identificado para hoje.
+                  Nenhum foco crÃ­tico identificado para hoje.
                 </div>
               ) : null}
             </div>
@@ -401,8 +400,8 @@ export default function DashboardPage() {
       </div>
 
       <SectionCard
-        title="Painel visual da competência"
-        subtitle="Gráficos mais leves e mais legíveis para leitura gerencial rápida."
+        title="Painel visual da competencia"
+        subtitle="Graficos e indicadores para leitura gerencial rapida."
       >
         <Tabs defaultValue="cashflow">
           <TabsList>
@@ -423,12 +422,12 @@ export default function DashboardPage() {
                     <SensitiveValue hidden={privacyMode}>{formatCurrency(data.projected_net)}</SensitiveValue>
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Com base na receita prevista, nas despesas, retiradas e parcelas da competência.
+                    Com base na receita prevista, nas despesas, retiradas e parcelas da competÃªncia.
                   </p>
                 </div>
 
                 <div className="rounded-[28px] border border-slate-200 bg-white p-5">
-                  <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Distribuição por categoria</h4>
+                  <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">DistribuiÃ§Ã£o por categoria</h4>
                   <div className="mt-4">
                     <HorizontalBarChart items={data.expenses_by_category || []} />
                   </div>
@@ -481,7 +480,7 @@ export default function DashboardPage() {
                         />
                         <div>
                           <strong className="text-sm font-semibold text-slate-950">{item.name}</strong>
-                          <p className="text-xs text-slate-500">Despesa da competência atual</p>
+                          <p className="text-xs text-slate-500">Despesa da competÃªncia atual</p>
                         </div>
                       </div>
                       <span className="text-sm font-semibold text-slate-900">
@@ -492,7 +491,7 @@ export default function DashboardPage() {
                 ))}
                 {(data.expenses_by_category || []).length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                    Sem despesas categorizadas na competência atual.
+                    Sem despesas categorizadas na competÃªncia atual.
                   </div>
                 ) : null}
               </div>
@@ -530,7 +529,7 @@ export default function DashboardPage() {
                 <div className="rounded-[28px] border border-slate-200 bg-slate-950 p-5 text-white">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Score atual</p>
                   <p className="mt-4 text-5xl font-extrabold tracking-tight">{formatNumber(weeklyCurrent.score || 0)}</p>
-                  <p className="mt-2 text-sm text-slate-300">{weeklyCurrent.classification_label || 'Sem classificação'}</p>
+                  <p className="mt-2 text-sm text-slate-300">{weeklyCurrent.classification_label || 'Sem classificaÃ§Ã£o'}</p>
                 </div>
 
                 <div className="rounded-[28px] border border-slate-200 bg-white p-5">
@@ -540,7 +539,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                      <p className="text-xs text-slate-500">Concluídas</p>
+                      <p className="text-xs text-slate-500">ConcluÃ­das</p>
                       <p className="mt-2 text-2xl font-bold text-slate-950">{formatNumber(weeklyCurrent.completed_count || 0)}</p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 px-4 py-3">
@@ -560,14 +559,14 @@ export default function DashboardPage() {
       </SectionCard>
 
       <SectionCard
-        title="Parcelas previstas na competência"
-        subtitle="Tabela com melhor leitura para validar o frontend novo sem alterar as regras de cobrança."
+        title="Parcelas previstas na competencia"
+        subtitle="Acompanhe vencimentos previstos da competencia com visao consolidada."
       >
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Dívida</th>
+                <th>DÃ­vida</th>
                 <th>Parcela</th>
                 <th>Vencimento</th>
                 <th>Valor</th>
@@ -590,7 +589,7 @@ export default function DashboardPage() {
               ))}
               {(data.installment_details || []).length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="empty-cell">Sem parcelas previstas para esta competência.</td>
+                  <td colSpan="6" className="empty-cell">Sem parcelas previstas para esta competÃªncia.</td>
                 </tr>
               ) : null}
             </tbody>
@@ -606,3 +605,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

@@ -28,11 +28,11 @@ export default function AlertsSummary({ executionCenter }) {
   return (
     <SectionCard
       title="Central de alertas"
-      subtitle="Resumo operacional derivado das regras atuais do backend PHP."
+      subtitle="Resumo das prioridades que pedem atencao agora."
       action={(
         <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
           <BellRing className="h-4 w-4 text-primary" />
-          {notifications.length} eventos ativos
+          {notifications.length} alertas ativos
         </div>
       )}
     >

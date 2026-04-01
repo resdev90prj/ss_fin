@@ -193,17 +193,14 @@ export default function DebtsPage() {
           <span className="hero-card__eyebrow">Dividas</span>
           <h1>Cadastre dividas parceladas, acompanhe pagamentos e execute estornos sem sair do mesmo fluxo.</h1>
           <p>
-            A nova interface cobre criacao, exclusao condicionada, pagamento, estorno
-            e detalhe por parcela reaproveitando integralmente as regras do backend.
+            Acompanhe parcelas, pagamentos, estornos e saldo em aberto com mais clareza.
           </p>
         </div>
       </section>
 
       {!data.charges_enabled ? (
         <div className="muted-line">
-          Juros e multa nao estao habilitados no banco atual. Adicione as colunas
-          `interest_mode`, `interest_value`, `penalty_mode`, `penalty_value` e
-          `last_charge_month` na tabela `debts` para liberar essa composicao.
+          Juros e multa nao estao disponiveis no momento.
         </div>
       ) : null}
 
@@ -220,7 +217,7 @@ export default function DebtsPage() {
         </div>
       ) : null}
 
-      <SectionCard title="Nova divida" subtitle="A estrutura de parcelas continua sendo gerada e protegida no backend PHP.">
+      <SectionCard title="Nova divida" subtitle="Informe valor, parcelas, vencimento e encargos para registrar a divida.">
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-6" onSubmit={handleSubmit}>
           <label className="xl:col-span-2">
             <span>Descricao</span>
@@ -362,7 +359,7 @@ export default function DebtsPage() {
       {selectedDebtId ? (
         <SectionCard
           title={details?.debt?.description ? `Parcelas de ${details.debt.description}` : 'Detalhes da divida'}
-          subtitle="Pague, estorne e exclua parcelas respeitando as mesmas travas de negocio do backend."
+          subtitle="Acompanhe parcelas e registre pagamentos ou estornos com seguranca."
         >
           {detailsLoading ? (
             <LoadingState text="Carregando parcelas da divida selecionada." />

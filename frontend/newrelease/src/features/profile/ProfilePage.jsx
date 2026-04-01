@@ -179,8 +179,7 @@ export default function ProfilePage() {
           <span className="hero-card__eyebrow">Meu acesso</span>
           <h1>Gerencie seus dados, sua senha e sua central de alertas em um so lugar.</h1>
           <p>
-            Toda a experiencia de autoatendimento agora esta no mesmo workspace,
-            reutilizando a autenticacao e as regras de seguranca do backend atual.
+            Atualize seus dados, mantenha a senha em dia e ajuste como deseja receber alertas.
           </p>
         </div>
       </section>
@@ -199,13 +198,12 @@ export default function ProfilePage() {
 
       {!alertTableAvailable ? (
         <div className="muted-line">
-          Preferencias de alerta indisponiveis no banco atual. Aplique o patch
-          `database/patches/20260312_alert_center_notifications.sql` para liberar esta area.
+          Preferencias de alerta indisponiveis no momento.
         </div>
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <SectionCard title="Dados basicos" subtitle="Atualize nome e e-mail usados na sua sessao.">
+        <SectionCard title="Dados basicos" subtitle="Atualize nome e e-mail usados na sua conta.">
           <form className="space-y-4" onSubmit={submitProfile}>
             <label>
               <span>Nome</span>
@@ -221,7 +219,7 @@ export default function ProfilePage() {
           </form>
         </SectionCard>
 
-        <SectionCard title="Alterar senha" subtitle="A confirmacao da senha atual continua sendo feita no backend.">
+        <SectionCard title="Alterar senha" subtitle="Confirme a senha atual antes de definir uma nova.">
           <form className="space-y-4" onSubmit={submitPassword}>
             <label>
               <span>Senha atual</span>

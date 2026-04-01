@@ -34,7 +34,7 @@ export default function AgendaPage() {
   }, []);
 
   if (loading) {
-    return <LoadingState text="Carregando a agenda de execucao ordenada pelo backend." />;
+    return <LoadingState text="Organizando sua agenda de execucao." />;
   }
 
   if (!data) {
@@ -55,7 +55,7 @@ export default function AgendaPage() {
         <div>
           <span className="hero-card__eyebrow">Agenda de execucao</span>
           <h1>Ordenacao diaria para foco operacional</h1>
-          <p>As prioridades diarias continuam centralizadas no backend e chegam prontas para a operacao.</p>
+          <p>Visualize prioridades do dia e acompanhe os itens que merecem resposta primeiro.</p>
         </div>
       </section>
 
@@ -86,7 +86,7 @@ export default function AgendaPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Agenda completa" subtitle="Leitura detalhada das acoes abertas com a mesma ordenacao operacional do sistema.">
+      <SectionCard title="Agenda completa" subtitle="Veja todas as acoes abertas em ordem de prioridade.">
         <div className="table-wrap">
           <table className="data-table">
             <thead>

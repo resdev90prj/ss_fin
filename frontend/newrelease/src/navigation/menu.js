@@ -46,7 +46,7 @@ export const moduleRegistry = {
     group: 'finance',
     icon: Vault,
     status: 'live',
-    description: 'Caixas, saldos dedicados e vinculos operacionais no mesmo workspace.',
+    description: 'Organize reservas, saldos dedicados e objetivos do caixa.',
   },
   categories: {
     key: 'categories',
@@ -56,7 +56,7 @@ export const moduleRegistry = {
     group: 'finance',
     icon: Shapes,
     status: 'live',
-    description: 'Categorias padrao e personalizadas protegidas por user_id.',
+    description: 'Classifique receitas e despesas com mais clareza.',
   },
   transactions: {
     key: 'transactions',
@@ -116,7 +116,7 @@ export const moduleRegistry = {
     group: 'planning',
     icon: Rocket,
     status: 'live',
-    description: 'Plano ativo, proximas acoes, score e inteligencia de execucao.',
+    description: 'Acompanhe prioridades, avancos e proximas acoes do plano.',
   },
   agenda: {
     key: 'agenda',
@@ -126,7 +126,7 @@ export const moduleRegistry = {
     group: 'operations',
     icon: CalendarClock,
     status: 'live',
-    description: 'Agenda priorizada a partir das regras atuais do backend.',
+    description: 'Veja o que pede atencao hoje e nos proximos dias.',
   },
   imports: {
     key: 'imports',
@@ -166,7 +166,7 @@ export const moduleRegistry = {
     group: 'admin',
     icon: Users,
     status: 'live',
-    description: 'Gestao administrativa de usuarios, senha, status e escopo.',
+    description: 'Gerencie acessos, perfis, status e visualizacao administrativa.',
     adminOnly: true,
   },
   logout: {
@@ -177,7 +177,7 @@ export const moduleRegistry = {
     group: 'account',
     icon: LogOut,
     status: 'action',
-    description: 'Encerrar a sessao atual.',
+    description: 'Encerrar sua sessao com seguranca.',
   },
 };
 

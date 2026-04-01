@@ -142,8 +142,7 @@ export default function AccountsPage() {
           <span className="hero-card__eyebrow">Contas financeiras</span>
           <h1>Cadastre e organize as contas que sustentam seu fluxo.</h1>
           <p>
-            A interface agora executa o ciclo real de criacao, edicao e ativacao
-            das contas sem tirar o usuario do mesmo fluxo.
+            Mantenha suas contas organizadas, com status e saldo inicial sempre atualizados.
           </p>
         </div>
       </section>
@@ -163,7 +162,7 @@ export default function AccountsPage() {
 
       <SectionCard
         title={editingId ? 'Editar conta' : 'Nova conta'}
-        subtitle="Regras e ownership continuam centralizados no backend PHP."
+        subtitle="Cadastre contas e ajuste status, instituicao e saldo inicial."
       >
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" onSubmit={handleSubmit}>
           <label className="xl:col-span-2">
@@ -211,7 +210,7 @@ export default function AccountsPage() {
         </form>
       </SectionCard>
 
-      <SectionCard title="Cadastro atual" subtitle="Visao operacional das contas ja disponiveis no ambiente atual.">
+      <SectionCard title="Cadastro atual" subtitle="Consulte as contas disponiveis e acompanhe o status de cada uma.">
         <div className="table-wrap">
           <table className="data-table">
             <thead>

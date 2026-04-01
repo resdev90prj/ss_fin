@@ -245,7 +245,7 @@ export default function UsersPage() {
         <div>
           <h2 className="text-lg font-bold tracking-tight text-slate-950">Acesso restrito</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Este modulo administrativo esta disponivel apenas para contas com perfil admin.
+            Este modulo esta disponivel apenas para perfis administradores.
           </p>
         </div>
       </section>
@@ -253,7 +253,7 @@ export default function UsersPage() {
   }
 
   if (loading && !data) {
-    return <LoadingState text="Carregando a gestao administrativa de usuarios e escopos." />;
+    return <LoadingState text="Carregando usuarios, perfis e permissoes." />;
   }
 
   if (!data) {
@@ -273,10 +273,9 @@ export default function UsersPage() {
       <section className="hero-card">
         <div>
           <span className="hero-card__eyebrow">Admin</span>
-          <h1>Gerencie acessos, perfis, status e escopo sem sair do mesmo workspace.</h1>
+          <h1>Gerencie usuarios, perfis, status e visualizacao administrativa em um so lugar.</h1>
           <p>
-            O modulo administrativo agora esta funcional na mesma interface, mantendo a mesma
-            seguranca, a mesma sessao PHP e o mesmo isolamento por usuario do sistema atual.
+            Crie acessos, atualize dados e acompanhe o status de cada conta com clareza.
           </p>
         </div>
       </section>
@@ -284,7 +283,7 @@ export default function UsersPage() {
       {scope.scoped_user_id ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span>Escopo ativo no usuario ID {scope.scoped_user_id}.</span>
+            <span>Visualizacao ativa no usuario ID {scope.scoped_user_id}.</span>
             <Button type="button" variant="outline" onClick={handleClearScope}>
               Limpar escopo
             </Button>
@@ -305,7 +304,7 @@ export default function UsersPage() {
         </div>
       ) : null}
 
-      <SectionCard title="Novo acesso" subtitle="Ao criar um usuario, as categorias padrao do sistema continuam sendo provisionadas no backend.">
+      <SectionCard title="Novo acesso" subtitle="Crie novos acessos e defina perfil, status e senha inicial.">
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-7" onSubmit={submitCreate}>
           <label className="xl:col-span-2">
             <span>Nome</span>
@@ -450,7 +449,7 @@ export default function UsersPage() {
             ) : null}
           </SectionCard>
 
-          <SectionCard title="Redefinir senha" subtitle="A nova senha do usuario selecionado continua sendo armazenada via hash no backend.">
+          <SectionCard title="Redefinir senha" subtitle="Defina uma nova senha para o usuario selecionado.">
             <form className="space-y-4" onSubmit={submitPassword}>
               <label>
                 <span>Nova senha</span>

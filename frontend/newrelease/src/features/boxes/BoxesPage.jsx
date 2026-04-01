@@ -123,8 +123,7 @@ export default function BoxesPage() {
           <span className="hero-card__eyebrow">Caixas virtuais</span>
           <h1>Separe reservas, frentes e objetivos em uma operacao unica.</h1>
           <p>
-            Os caixas agora podem ser geridos diretamente pela mesma experiencia,
-            com vinculo opcional a contas e saldo dedicado por contexto.
+            Organize saldos dedicados por objetivo e mantenha vinculos com contas quando fizer sentido.
           </p>
         </div>
       </section>
@@ -144,7 +143,7 @@ export default function BoxesPage() {
 
       <SectionCard
         title={editingId ? 'Editar caixa' : 'Novo caixa'}
-        subtitle="Fluxo real dentro da mesma interface, mantendo validacao de ownership no backend."
+        subtitle="Defina nome, objetivo, saldo e vinculo opcional com uma conta."
       >
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" onSubmit={handleSubmit}>
           <label className="xl:col-span-2">

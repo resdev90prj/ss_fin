@@ -2,17 +2,28 @@ import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+function resolveRedirectTarget(location) {
+  const target = location.state?.from;
+
+  if (typeof target !== 'string' || target === '' || target === '/login' || target === '/logout') {
+    return '/';
+  }
+
+  return target;
+}
+
 export default function LoginPage() {
   const { session, login, authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const redirectTarget = resolveRedirectTarget(location);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   if (session.authenticated) {
-    return <Navigate to={location.state?.from || '/'} replace />;
+    return <Navigate to={redirectTarget} replace />;
   }
 
   async function handleSubmit(event) {
@@ -22,7 +33,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-      navigate(location.state?.from || '/', { replace: true });
+      navigate(redirectTarget, { replace: true });
     } catch (requestError) {
       const errors = Array.isArray(requestError.errors) && requestError.errors.length > 0
         ? requestError.errors.join(' ')
@@ -37,25 +48,24 @@ export default function LoginPage() {
     <div className="login-layout">
       <section className="login-panel login-panel--highlight">
         <div>
-          <span className="login-kicker">Workspace financeiro</span>
-          <h1>Entre no seu workspace financeiro com a mesma seguranca do backend atual</h1>
+          <span className="login-kicker">SaaS IA Finan</span>
+          <h1>Entre para acompanhar seu financeiro com clareza e seguranca.</h1>
           <p>
-            Esta experiencia usa a mesma sessao PHP, o mesmo isolamento por user_id e
-            as mesmas regras criticas do sistema. A interface mudou; a protecao permanece.
+            Reuna saldos, metas, agenda e rotina financeira em um so lugar.
           </p>
 
           <div className="feature-stack">
             <article>
-              <strong>Experiencia unificada</strong>
-              <p>Os principais modulos operam dentro da mesma interface, sem depender de saltos para outra tela.</p>
+              <strong>Visao do dia</strong>
+              <p>Tenha uma leitura rapida do caixa, das prioridades e dos compromissos da competencia.</p>
             </article>
             <article>
-              <strong>API em PHP</strong>
-              <p>Os endpoints JSON reaproveitam autenticacao, permissao, sessao e regras de negocio do sistema atual.</p>
+              <strong>Controle financeiro</strong>
+              <p>Organize contas, categorias, transacoes, retiradas, dividas e importacoes com fluidez.</p>
             </article>
             <article>
-              <strong>Fluxo consistente</strong>
-              <p>Dashboard, financeiro, operacao e conta compartilham a mesma navegacao e a mesma identidade visual.</p>
+              <strong>Planejamento em acao</strong>
+              <p>Acompanhe metas, agenda e proximas acoes para manter a execucao em dia.</p>
             </article>
           </div>
         </div>
@@ -63,9 +73,9 @@ export default function LoginPage() {
 
       <section className="login-panel">
         <div className="login-card">
-          <span className="login-kicker">Acesso controlado</span>
+          <span className="login-kicker">Acesso seguro</span>
           <h2>Entrar</h2>
-          <p>Use suas credenciais atuais. A autenticacao continua centralizada no PHP.</p>
+          <p>Use seu e-mail e senha para continuar.</p>
 
           {(error || authError) && (
             <div className="alert-banner alert-banner--danger">

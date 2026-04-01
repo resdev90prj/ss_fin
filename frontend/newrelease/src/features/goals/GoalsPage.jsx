@@ -148,8 +148,7 @@ export default function GoalsPage() {
           <span className="hero-card__eyebrow">Metas financeiras</span>
           <h1>Transforme objetivos financeiros em acompanhamento continuo.</h1>
           <p>
-            A interface agora cobre o ciclo real de cadastro, evolucao e ajuste das metas,
-            com progresso calculado a partir dos mesmos dados do backend atual.
+            Crie metas, acompanhe a evolucao e ajuste valores ou prazos quando precisar.
           </p>
         </div>
       </section>
@@ -167,7 +166,7 @@ export default function GoalsPage() {
         </div>
       ) : null}
 
-      <SectionCard title={editingId ? 'Editar meta' : 'Nova meta'} subtitle="A meta continua sendo armazenada e validada integralmente no backend PHP.">
+      <SectionCard title={editingId ? 'Editar meta' : 'Nova meta'} subtitle="Defina valor alvo, valor atual, prazo e status da meta.">
         <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-5" onSubmit={handleSubmit}>
           <label className="xl:col-span-2">
             <span>Titulo</span>

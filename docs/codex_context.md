@@ -68,6 +68,7 @@
   - login React consumindo sessao PHP;
   - dashboard React com resumo financeiro, central de execucao, agenda, score semanal, modo privacidade e nova hierarquia visual SaaS baseada em cards, contrastes fortes e graficos leves;
   - modulos com fluxo funcional em React para `accounts`, `boxes`, `categories`, `transactions`, `withdrawals`, `debts`, `budgets`, `goals`, `targets`, `agenda`, `imports`, `reports`, `profile` e `users` (admin), cobrindo leitura e principais acoes operacionais sem sair de `/newrelease`;
+  - interface em fase de homologacao com limpeza de microcopy para linguagem oficial de produto, sem textos de migracao, ambiente paralelo ou bastidores tecnicos expostos ao usuario final;
   - experiencia da nova release sem botao "abrir no legado", sem redirects para views PHP antigas e sem placeholders de navegacao para os itens presentes no menu.
 - API JSON paralela (`api`):
   - endpoints para autenticacao, sessao, dashboard, contas, caixas, categorias, transacoes, orcamentos, metas, relatorios, importacoes, dividas, perfil do usuario e administracao de usuarios;
@@ -199,6 +200,7 @@
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
 - Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui, lazy loading por rota e build estatico com `base=/newrelease/`.
+- Durante a homologacao da release React, textos e elementos visuais devem priorizar contexto de uso do produto; referencias a migracao, stack, backend, release paralela ou detalhes tecnicos nao devem aparecer na interface final.
 - Cada item relevante do menu da nova release deve possuir rota funcional no React; bridges, redirects e placeholders para modulos do legado nao fazem parte da experiencia final esperada.
 - Arquivos PHP ativos padronizados para UTF-8 sem BOM para evitar saida antes de `session_start()` e `header()` em hospedagem.
 - Diagnostico de runtime opcional no bootstrap (`index.php`) controlado por `debug.enabled` em `includes/config.php`/`includes/config.custom.php`, com `display_errors` desligado por padrao.

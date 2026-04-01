@@ -133,10 +133,9 @@ export default function ImportsPage() {
       <section className="hero-card">
         <div>
           <span className="hero-card__eyebrow">Importacao</span>
-          <h1>Importe extratos manuais e monitore a fila OFX sem sair do seu workspace.</h1>
+          <h1>Importe extratos e acompanhe o processamento em um so lugar.</h1>
           <p>
-            Esta interface agora cobre upload manual, processamento da fila OFX e o
-            painel operacional completo da importacao dentro do proprio modulo.
+            Envie arquivos, acompanhe o processamento e revise o historico recente das importacoes.
           </p>
         </div>
       </section>
@@ -183,7 +182,7 @@ export default function ImportsPage() {
           </form>
         </SectionCard>
 
-        <SectionCard title="Fila OFX automatizada" subtitle="Processa os arquivos presentes em imports/pending para o usuario atual.">
+        <SectionCard title="Fila OFX automatizada" subtitle="Processe os arquivos aguardando importacao.">
           <div className="space-y-4">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
               <p>Arquivos pendentes: <strong>{formatNumber(pendingFiles.length)}</strong></p>
@@ -200,7 +199,7 @@ export default function ImportsPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <SectionCard title="Pendentes em imports/pending" subtitle="Arquivos aguardando processamento na fila OFX.">
+        <SectionCard title="Arquivos pendentes" subtitle="Arquivos aguardando processamento na fila OFX.">
           <div className="stack-list">
             {pendingFiles.length === 0 ? <div className="muted-line">Sem arquivos pendentes.</div> : null}
             {pendingFiles.map((item) => (
@@ -227,7 +226,7 @@ export default function ImportsPage() {
         </SectionCard>
       </div>
 
-      <SectionCard title="Logs recentes da fila" subtitle="Historico rapido das ultimas execucoes de processamento.">
+      <SectionCard title="Historico recente" subtitle="Acompanhe as ultimas execucoes de processamento.">
         <div className="stack-list">
           {recentLogs.length === 0 ? <div className="muted-line">Sem logs disponiveis ainda.</div> : null}
           {recentLogs.map((line) => (

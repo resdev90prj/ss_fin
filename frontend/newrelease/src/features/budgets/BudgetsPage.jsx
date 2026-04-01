@@ -131,8 +131,7 @@ export default function BudgetsPage() {
           <span className="hero-card__eyebrow">Orcamentos</span>
           <h1>Defina limites mensais por categoria sem sair do produto.</h1>
           <p>
-            A interface agora cobre a manutencao real dos orcamentos, preservando
-            o upsert do backend PHP e a mesma base de categorias do sistema.
+            Acompanhe limites por categoria e ajuste o planejamento sempre que necessario.
           </p>
         </div>
       </section>

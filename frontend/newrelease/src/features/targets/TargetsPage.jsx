@@ -35,7 +35,7 @@ export default function TargetsPage() {
   }, []);
 
   if (loading) {
-    return <LoadingState text="Consultando o plano ativo, a agenda e o score semanal." />;
+    return <LoadingState text="Carregando seu plano, agenda e score semanal." />;
   }
 
   if (!data) {
@@ -57,7 +57,7 @@ export default function TargetsPage() {
         <div>
           <span className="hero-card__eyebrow">Alvos, objetivos e execucao</span>
           <h1>Resumo estrategico do plano atual</h1>
-          <p>O modulo consome a mesma inteligencia de agenda, prioridades e score semanal criada no backend.</p>
+          <p>Acompanhe avanco, prioridades e proximos passos do plano em uma visao objetiva.</p>
         </div>
       </section>
 
@@ -69,7 +69,7 @@ export default function TargetsPage() {
       </div>
 
       <div className="dashboard-grid">
-        <SectionCard title="Plano ativo" subtitle="Snapshot do alvo em execucao.">
+        <SectionCard title="Plano ativo" subtitle="Visao resumida do plano em execucao.">
           {planning.active_target ? (
             <div className="stack-list">
               <article className="stack-item stack-item--accent">
@@ -100,7 +100,7 @@ export default function TargetsPage() {
         <AlertsSummary executionCenter={executionCenter} />
       </div>
 
-      <SectionCard title="Proximas acoes" subtitle="Itens priorizados pela camada de dominio atual.">
+      <SectionCard title="Proximas acoes" subtitle="Itens com maior prioridade no momento.">
         <div className="stack-list">
           {(planning.next_actions || []).map((action) => (
             <article key={action.id} className="stack-item">
