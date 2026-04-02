@@ -17,7 +17,7 @@ export default function OnboardingChecklist() {
       action={(
         <Button type="button" variant="outline" size="sm" onClick={() => startTour(0)}>
           <CirclePlay className="h-4 w-4" />
-          Ver tour
+          Tour
         </Button>
       )}
       contentClassName="space-y-5"

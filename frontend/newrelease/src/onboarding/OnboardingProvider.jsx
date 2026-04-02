@@ -57,7 +57,7 @@ function emptyChecklistState() {
 
 function onboardingStorageKey(session) {
   const effectiveUserId = session.scope?.current_user_id || session.scope?.scoped_user_id || session.user?.id || 'anon';
-  return `ssfin:onboarding:${effectiveUserId}:tour:v1`;
+  return `ssfin:onboarding:${effectiveUserId}:react-update-tour:v2`;
 }
 
 export function OnboardingProvider({ children }) {

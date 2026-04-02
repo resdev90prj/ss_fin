@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  CirclePlay,
   ChevronDown,
   ChevronRight,
   Menu,
@@ -8,6 +9,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import { getNavigationGroups, moduleRegistry } from '../navigation/menu';
+import { useOnboarding } from '../onboarding/OnboardingProvider';
 import { Button } from './ui/button';
 
 const defaultCollapsedGroups = {
@@ -110,6 +112,7 @@ function NavigationGroup({ group, pathname, collapsed, onToggle, onNavigate }) {
 
 export default function AppShell() {
   const { session } = useAuth();
+  const { startTour } = useOnboarding();
   const location = useLocation();
   const currentUser = session.user;
   const scope = session.scope || {};
@@ -222,6 +225,11 @@ export default function AppShell() {
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                <Button type="button" variant="outline" size="sm" className="bg-white" onClick={() => startTour(0)}>
+                  <CirclePlay className="h-4 w-4" />
+                  Tour
+                </Button>
+
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                   <strong className="block text-sm font-semibold text-slate-950">{currentUser?.name || 'Usuario'}</strong>
                   <span className="text-xs text-slate-500">
