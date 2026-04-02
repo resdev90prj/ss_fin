@@ -178,7 +178,9 @@ export default function AppShell() {
           <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
             Gestao financeira
           </span>
-          <h1 className="mt-4 font-display text-3xl tracking-tight">{session.release?.app_name || 'SaaS IA Finan'}</h1>
+          <h1 className="mt-4 font-display text-3xl tracking-tight">
+            {currentUser?.name || session.release?.app_name || 'SaaS IA Finan'}
+          </h1>
           <p className="mt-3 text-sm leading-6 text-slate-300">
             Acompanhe caixa, metas, agenda e operacao em uma experiencia clara e objetiva.
           </p>
