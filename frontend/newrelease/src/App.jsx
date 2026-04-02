@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import AppShell from './components/AppShell';
 import LoadingState from './components/LoadingState';
 import ProtectedRoute from './components/ProtectedRoute';
+import { OnboardingProvider } from './onboarding/OnboardingProvider';
 
 const LoginPage = lazy(() => import('./features/auth/LoginPage'));
 const LogoutPage = lazy(() => import('./features/auth/LogoutPage'));
@@ -31,41 +32,43 @@ export default function App() {
   return (
     <BrowserRouter basename={routerBase}>
       <AuthProvider>
-        <Suspense
-          fallback={(
-            <div className="fullscreen-center">
-              <LoadingState text="Carregando modulo..." />
-            </div>
-          )}
-        >
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
+        <OnboardingProvider>
+          <Suspense
+            fallback={(
+              <div className="fullscreen-center">
+                <LoadingState text="Carregando modulo..." />
+              </div>
+            )}
+          >
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
 
-            <Route element={<ProtectedRoute />}>
-              <Route path="/logout" element={<LogoutPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/logout" element={<LogoutPage />} />
 
-              <Route element={<AppShell />}>
-                <Route index element={<DashboardPage />} />
-                <Route path="/accounts" element={<AccountsPage />} />
-                <Route path="/boxes" element={<BoxesPage />} />
-                <Route path="/categories" element={<CategoriesPage />} />
-                <Route path="/transactions" element={<TransactionsPage />} />
-                <Route path="/withdrawals" element={<WithdrawalsPage />} />
-                <Route path="/debts" element={<DebtsPage />} />
-                <Route path="/budgets" element={<BudgetsPage />} />
-                <Route path="/goals" element={<GoalsPage />} />
-                <Route path="/targets" element={<TargetsPage />} />
-                <Route path="/agenda" element={<AgendaPage />} />
-                <Route path="/imports" element={<ImportsPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/users" element={<UsersPage />} />
+                <Route element={<AppShell />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="/accounts" element={<AccountsPage />} />
+                  <Route path="/boxes" element={<BoxesPage />} />
+                  <Route path="/categories" element={<CategoriesPage />} />
+                  <Route path="/transactions" element={<TransactionsPage />} />
+                  <Route path="/withdrawals" element={<WithdrawalsPage />} />
+                  <Route path="/debts" element={<DebtsPage />} />
+                  <Route path="/budgets" element={<BudgetsPage />} />
+                  <Route path="/goals" element={<GoalsPage />} />
+                  <Route path="/targets" element={<TargetsPage />} />
+                  <Route path="/agenda" element={<AgendaPage />} />
+                  <Route path="/imports" element={<ImportsPage />} />
+                  <Route path="/reports" element={<ReportsPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/users" element={<UsersPage />} />
+                </Route>
               </Route>
-            </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </OnboardingProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/button';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/apiClient';
 import { formatCurrency, formatNumber } from '../../lib/formatters';
+import { useOnboarding } from '../../onboarding/OnboardingProvider';
 
 const emptyForm = {
   name: '',
@@ -18,6 +19,7 @@ const emptyForm = {
 
 export default function AccountsPage() {
   const { session } = useAuth();
+  const { refreshProgress } = useOnboarding();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -93,6 +95,7 @@ export default function AccountsPage() {
       setNotice(editingId ? 'Conta atualizada com sucesso.' : 'Conta criada com sucesso.');
       resetForm();
       await loadAccounts();
+      await refreshProgress();
     } catch (requestError) {
       setError(requestError.message || 'Nao foi possivel salvar a conta.');
     } finally {
@@ -115,6 +118,7 @@ export default function AccountsPage() {
 
       setNotice('Status da conta atualizado com sucesso.');
       await loadAccounts();
+      await refreshProgress();
     } catch (requestError) {
       setError(requestError.message || 'Nao foi possivel alterar o status da conta.');
     }

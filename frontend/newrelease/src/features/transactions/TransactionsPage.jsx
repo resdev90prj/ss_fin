@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/button';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../lib/apiClient';
 import { formatCurrency, formatDate, formatNumber } from '../../lib/formatters';
+import { useOnboarding } from '../../onboarding/OnboardingProvider';
 
 const initialFilters = {
   from: '',
@@ -32,6 +33,7 @@ const emptyForm = {
 
 export default function TransactionsPage() {
   const { session } = useAuth();
+  const { refreshProgress } = useOnboarding();
   const [filters, setFilters] = useState(initialFilters);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -188,6 +190,7 @@ export default function TransactionsPage() {
       setNotice(editingId ? 'Transacao atualizada com sucesso.' : 'Transacao cadastrada com sucesso.');
       resetForm();
       await loadTransactions(filters);
+      await refreshProgress();
     } catch (requestError) {
       setError(requestError.message || 'Nao foi possivel salvar a transacao.');
     } finally {
@@ -233,6 +236,7 @@ export default function TransactionsPage() {
 
       setNotice('Transacao excluida com sucesso.');
       await loadTransactions(filters);
+      await refreshProgress();
     } catch (requestError) {
       setError(requestError.message || 'Nao foi possivel excluir a transacao.');
     }

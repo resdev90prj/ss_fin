@@ -15,6 +15,7 @@ require_once api_project_root() . '/controllers/api/ApiUserController.php';
 require_once api_project_root() . '/controllers/api/ApiImportController.php';
 require_once api_project_root() . '/controllers/api/ApiDebtController.php';
 require_once api_project_root() . '/controllers/api/ApiTargetController.php';
+require_once api_project_root() . '/controllers/api/ApiOnboardingController.php';
 
 $method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $path = api_request_path();
@@ -222,6 +223,10 @@ switch ($method . ' ' . $path) {
 
     case 'GET /targets/summary':
         (new ApiTargetController())->summary();
+        break;
+
+    case 'GET /onboarding/summary':
+        (new ApiOnboardingController())->summary();
         break;
 
     default:

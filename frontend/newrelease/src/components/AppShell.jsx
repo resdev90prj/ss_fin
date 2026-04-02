@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDown,
   ChevronRight,
@@ -36,6 +36,7 @@ function NavigationItem({ item, onNavigate }) {
       to={item.path}
       end={item.path === '/'}
       onClick={onNavigate}
+      data-onboarding-id={`nav-${item.key}`}
       className={({ isActive }) =>
         cn(
           'group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition-all',
@@ -116,6 +117,7 @@ export default function AppShell() {
   const pathname = location.pathname || '/';
   const [collapsedGroups, setCollapsedGroups] = useState(defaultCollapsedGroups);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuOpenedByTourRef = useRef(false);
 
   const navigationGroups = useMemo(() => getNavigationGroups({ isAdmin }), [isAdmin]);
 
@@ -134,6 +136,38 @@ export default function AppShell() {
     setMobileMenuOpen(false);
   }
 
+  useEffect(() => {
+    function handleTourOpen() {
+      setCollapsedGroups({ ...defaultCollapsedGroups });
+
+      if (window.innerWidth < 1024) {
+        setMobileMenuOpen((current) => {
+          mobileMenuOpenedByTourRef.current = !current;
+          return true;
+        });
+        return;
+      }
+
+      mobileMenuOpenedByTourRef.current = false;
+    }
+
+    function handleTourClose() {
+      if (mobileMenuOpenedByTourRef.current) {
+        setMobileMenuOpen(false);
+      }
+
+      mobileMenuOpenedByTourRef.current = false;
+    }
+
+    window.addEventListener('onboarding:tour-open', handleTourOpen);
+    window.addEventListener('onboarding:tour-close', handleTourClose);
+
+    return () => {
+      window.removeEventListener('onboarding:tour-open', handleTourOpen);
+      window.removeEventListener('onboarding:tour-close', handleTourClose);
+    };
+  }, []);
+
   return (
     <div className="app-shell bg-grid-slate">
       <aside className="hidden min-h-screen border-r border-slate-200/80 bg-slate-950 px-5 py-6 text-white lg:flex lg:flex-col">
@@ -147,7 +181,7 @@ export default function AppShell() {
           </p>
         </div>
 
-        <nav className="mt-6 flex-1 space-y-4 overflow-y-auto pr-1" aria-label="Principal">
+        <nav className="mt-6 flex-1 space-y-4 overflow-y-auto pr-1" aria-label="Principal" data-onboarding-id="main-navigation">
           {navigationGroups.map((group) => (
             <NavigationGroup
               key={group.key}
@@ -199,7 +233,7 @@ export default function AppShell() {
             </div>
 
             {mobileMenuOpen ? (
-              <div className="rounded-[28px] border border-slate-200 bg-slate-950 p-4 text-white shadow-panel lg:hidden">
+              <div className="rounded-[28px] border border-slate-200 bg-slate-950 p-4 text-white shadow-panel lg:hidden" data-onboarding-id="main-navigation">
                 <div className="space-y-4">
                   {navigationGroups.map((group) => (
                     <NavigationGroup

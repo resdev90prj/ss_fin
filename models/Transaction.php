@@ -4,6 +4,14 @@ require_once __DIR__ . '/../includes/CategoryAutoClassifier.php';
 
 class Transaction extends Model
 {
+    public function countByUser(int $userId): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) AS total FROM transactions WHERE user_id = :user_id');
+        $stmt->execute(['user_id' => $userId]);
+        $row = $stmt->fetch();
+        return (int)($row['total'] ?? 0);
+    }
+
     public function listByUser(int $userId, array $filters = [], bool $prioritizeOthers = false): array
     {
         $sql = 'SELECT t.*, c.name AS category_name, a.name AS account_name, b.name AS box_name

@@ -37,6 +37,7 @@ import { Switch } from '../../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { apiRequest } from '../../lib/apiClient';
 import { currentMonthValue, formatCurrency, formatDate, formatNumber, formatPercent } from '../../lib/formatters';
+import OnboardingChecklist from '../../onboarding/OnboardingChecklist';
 
 const weeklyColors = ['#155eef', '#3b82f6', '#06b6d4', '#22c55e', '#f59e0b', '#e11d48'];
 const categoryColors = ['#155eef', '#3b82f6', '#06b6d4', '#039855', '#d97706', '#e11d48'];
@@ -130,7 +131,7 @@ export default function DashboardPage() {
 
   return (
     <div className="page-stack">
-      <section className="hero-card bg-grid-slate">
+      <section className="hero-card bg-grid-slate" data-onboarding-id="dashboard-hero">
         <div className="max-w-3xl">
           <span className="hero-card__eyebrow">Visao geral</span>
           <h1 className="font-display text-4xl tracking-tight text-slate-950 md:text-5xl">
@@ -173,7 +174,9 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <div className="stats-grid stats-grid--wide">
+      <OnboardingChecklist />
+
+      <div className="stats-grid stats-grid--wide" data-onboarding-id="dashboard-indicators">
         <StatCard
           className="xl:col-span-2"
           label="Saldo acumulado"

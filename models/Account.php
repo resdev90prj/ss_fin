@@ -3,6 +3,14 @@ require_once __DIR__ . '/Model.php';
 
 class Account extends Model
 {
+    public function countByUser(int $userId): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) AS total FROM accounts WHERE user_id = :user_id');
+        $stmt->execute(['user_id' => $userId]);
+        $row = $stmt->fetch();
+        return (int)($row['total'] ?? 0);
+    }
+
     public function allByUser(int $userId): array
     {
         $stmt = $this->db->prepare('SELECT * FROM accounts WHERE user_id = :user_id ORDER BY id DESC');

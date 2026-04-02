@@ -3,6 +3,36 @@ require_once __DIR__ . '/Model.php';
 
 class Target extends Model
 {
+    public function countByUser(int $userId): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) AS total FROM targets WHERE user_id = :user_id');
+        $stmt->execute(['user_id' => $userId]);
+        $row = $stmt->fetch();
+        return (int)($row['total'] ?? 0);
+    }
+
+    public function actionSummaryByUser(int $userId): array
+    {
+        $sql = "SELECT
+                    COALESCE(SUM(CASE WHEN a.status <> 'cancelled' THEN 1 ELSE 0 END), 0) AS total_actions,
+                    COALESCE(SUM(CASE WHEN a.status <> 'cancelled' AND (a.is_done = 1 OR a.status = 'completed') THEN 1 ELSE 0 END), 0) AS completed_actions
+                FROM targets t
+                LEFT JOIN objectives o ON o.target_id = t.id
+                LEFT JOIN decisions d ON d.objective_id = o.id
+                LEFT JOIN actions a ON a.decision_id = d.id
+                WHERE t.user_id = :user_id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['user_id' => $userId]);
+
+        $row = $stmt->fetch() ?: [];
+
+        return [
+            'total_actions' => (int)($row['total_actions'] ?? 0),
+            'completed_actions' => (int)($row['completed_actions'] ?? 0),
+        ];
+    }
+
     public function allByUser(int $userId): array
     {
         $sql = "SELECT t.*,
