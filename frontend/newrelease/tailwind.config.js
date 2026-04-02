@@ -68,7 +68,7 @@ export default {
       },
       fontFamily: {
         sans: ['"Manrope"', '"Segoe UI Variable"', '"Segoe UI"', 'sans-serif'],
-        display: ['"Fraunces"', 'Georgia', 'serif'],
+        display: ['"Sora"', '"Manrope"', '"Segoe UI Variable"', '"Segoe UI"', 'sans-serif'],
       },
       boxShadow: {
         panel: '0 24px 60px rgba(15, 23, 42, 0.10)',
