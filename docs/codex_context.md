@@ -236,6 +236,7 @@
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
 - Autorizacao nova centralizada em `includes/access.php`, com helpers reutilizaveis para resolver escopo atual, modulos efetivos, modulos de navegacao e capacidade de um ator gerenciar outro usuario.
+- Promocao de `user` para `gestor_financeiro` no painel React depende do `role` persistido no backend; vinculo gestor-cliente e configuracao modular so exigem schema complementar quando realmente usados, evitando bloqueio indevido na simples troca de perfil.
 - Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui, lazy loading por rota e build estatico com `base=/newrelease/`.
 - Durante a homologacao da release React, textos e elementos visuais devem priorizar contexto de uso do produto; referencias a migracao, stack, backend, release paralela ou detalhes tecnicos nao devem aparecer na interface final.
 - Cada item relevante do menu da nova release deve possuir rota funcional no React; bridges, redirects e placeholders para modulos do legado nao fazem parte da experiencia final esperada.

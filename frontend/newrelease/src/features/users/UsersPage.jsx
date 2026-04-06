@@ -41,6 +41,21 @@ function buildEditForm(user) {
   };
 }
 
+function buildUserPayload(form, session, moduleState) {
+  const role = form.role || 'user';
+  const payload = {
+    ...form,
+    manager_user_id: role === 'user' && form.manager_user_id ? Number(form.manager_user_id) : null,
+    csrf_token: session.csrf_token,
+  };
+
+  if (role === 'user') {
+    payload.enabled_modules = extractEnabledModules(moduleState);
+  }
+
+  return payload;
+}
+
 export default function UsersPage() {
   const { session, refreshSession } = useAuth();
   const [data, setData] = useState(null);
@@ -168,7 +183,15 @@ export default function UsersPage() {
 
       if (name === 'role' && value !== 'user') {
         nextForm.manager_user_id = '';
-        setEditModuleState(createModuleSelection(moduleOptions, moduleOptions.map((moduleOption) => moduleOption.key)));
+      }
+
+      if (name === 'role' || name === 'manager_user_id') {
+        const defaultModules = defaultEnabledModulesForRole(
+          nextForm.role,
+          nextForm.role === 'user' && Number(nextForm.manager_user_id) > 0,
+          moduleOptions,
+        );
+        setEditModuleState(createModuleSelection(moduleOptions, defaultModules));
       }
 
       return nextForm;
@@ -215,12 +238,7 @@ export default function UsersPage() {
     try {
       await apiRequest('/users', {
         method: 'POST',
-        data: {
-          ...createForm,
-          manager_user_id: createForm.manager_user_id ? Number(createForm.manager_user_id) : null,
-          enabled_modules: extractEnabledModules(createModuleState),
-          csrf_token: session.csrf_token,
-        },
+        data: buildUserPayload(createForm, session, createModuleState),
       });
       resetCreateForm();
       setNotice('Usuario criado com sucesso.');
@@ -245,12 +263,7 @@ export default function UsersPage() {
     try {
       await apiRequest('/users/update', {
         method: 'POST',
-        data: {
-          ...editForm,
-          manager_user_id: editForm.manager_user_id ? Number(editForm.manager_user_id) : null,
-          enabled_modules: extractEnabledModules(editModuleState),
-          csrf_token: session.csrf_token,
-        },
+        data: buildUserPayload(editForm, session, editModuleState),
       });
       await refreshSession();
       setNotice('Usuario atualizado com sucesso.');

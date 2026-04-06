@@ -254,10 +254,15 @@ class ApiUserController
             api_json_response(false, 'Ja existe usuario com este e-mail.', [], ['Use outro e-mail.'], 422);
         }
 
+        $this->ensureRoleSupported($userModel, $role);
         $managerUserId = $this->resolveManagerUserId($userModel, $payload, $role, $actor, null);
         $enabledModules = $this->resolveEnabledModulesForCreate($payload, $role, $managerUserId !== null);
 
-        $this->ensureRequiredSchema($userModel, $role, $managerUserId, array_key_exists('enabled_modules', $payload));
+        $this->ensureRequiredSchema(
+            $userModel,
+            $managerUserId !== null,
+            $role === 'user' && array_key_exists('enabled_modules', $payload),
+        );
 
         $newUserId = $userModel->create([
             'name' => $name,
@@ -315,10 +320,15 @@ class ApiUserController
             api_json_response(false, 'Nao e permitido desativar o proprio usuario.', [], ['Mantenha seu usuario ativo.'], 422);
         }
 
+        $this->ensureRoleSupported($userModel, $role);
         $managerUserId = $this->resolveManagerUserId($userModel, $payload, $role, $actor, $target);
         $enabledModules = $this->resolveEnabledModulesForUpdate($payload, $role, $managerUserId !== null, $target);
 
-        $this->ensureRequiredSchema($userModel, $role, $managerUserId, array_key_exists('enabled_modules', $payload));
+        $this->ensureRequiredSchema(
+            $userModel,
+            $managerUserId !== null,
+            $role === 'user' && array_key_exists('enabled_modules', $payload),
+        );
 
         $userModel->updateByAdmin($id, [
             'name' => $name,
@@ -577,6 +587,10 @@ class ApiUserController
 
     private function resolveEnabledModulesForCreate(array $payload, string $role, bool $isManagedClient): array
     {
+        if ($role !== 'user') {
+            return access_default_configurable_modules($role, false);
+        }
+
         if (array_key_exists('enabled_modules', $payload)) {
             return $this->sanitizeEnabledModules($payload['enabled_modules']);
         }
@@ -586,6 +600,10 @@ class ApiUserController
 
     private function resolveEnabledModulesForUpdate(array $payload, string $role, bool $isManagedClient, array $target): array
     {
+        if ($role !== 'user') {
+            return access_default_configurable_modules($role, false);
+        }
+
         if (array_key_exists('enabled_modules', $payload)) {
             return $this->sanitizeEnabledModules($payload['enabled_modules']);
         }
@@ -633,10 +651,19 @@ class ApiUserController
         $userModel->saveModuleAccessMap($userId, $moduleAccess);
     }
 
-    private function ensureRequiredSchema(User $userModel, string $role, ?int $managerUserId, bool $modulesTouched): void
+    private function ensureRoleSupported(User $userModel, string $role): void
     {
-        $needsManagerColumn = $role === 'gestor_financeiro' || $managerUserId !== null;
-        $needsModuleTable = $modulesTouched || $role === 'gestor_financeiro' || $managerUserId !== null;
+        if ($userModel->supportsRoleValue($role)) {
+            return;
+        }
+
+        api_json_response(false, 'Perfil indisponivel na estrutura atual do banco.', [], [
+            'Aplique o patch SQL desta feature para permitir o papel gestor financeiro no campo role.',
+        ], 422);
+    }
+
+    private function ensureRequiredSchema(User $userModel, bool $needsManagerColumn, bool $needsModuleTable): void
+    {
 
         if ($needsManagerColumn && !$userModel->hasManagerUserColumn()) {
             api_json_response(false, 'Estrutura de gestor-cliente indisponivel no banco.', [], [

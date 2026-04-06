@@ -6,6 +6,7 @@ class User extends Model
     private ?bool $alertPreferencesTableAvailable = null;
     private ?bool $managerUserColumnAvailable = null;
     private ?bool $moduleAccessTableAvailable = null;
+    private ?array $roleColumnMetadata = null;
 
     public function findByEmail(string $email, bool $onlyActive = true): ?array
     {
@@ -503,6 +504,21 @@ class User extends Model
         return $this->moduleAccessTableAvailable;
     }
 
+    public function supportsRoleValue(string $role): bool
+    {
+        $role = trim($role);
+        if ($role === '') {
+            return false;
+        }
+
+        $metadata = $this->roleColumnMetadata();
+        if (!empty($metadata['flexible'])) {
+            return true;
+        }
+
+        return in_array($role, (array)($metadata['allowed'] ?? []), true);
+    }
+
     private function userSelectFields(): string
     {
         $fields = [
@@ -575,5 +591,35 @@ class User extends Model
             return '08:00';
         }
         return $hour;
+    }
+
+    private function roleColumnMetadata(): array
+    {
+        if ($this->roleColumnMetadata !== null) {
+            return $this->roleColumnMetadata;
+        }
+
+        try {
+            $stmt = $this->db->query("SHOW COLUMNS FROM users LIKE 'role'");
+            $column = $stmt->fetch();
+            $type = strtolower((string)($column['Type'] ?? ''));
+
+            if ($type !== '' && str_starts_with($type, 'enum(')) {
+                preg_match_all("/'([^']+)'/", $type, $matches);
+                $this->roleColumnMetadata = [
+                    'flexible' => false,
+                    'allowed' => $matches[1] ?? [],
+                ];
+                return $this->roleColumnMetadata;
+            }
+        } catch (Throwable $e) {
+        }
+
+        $this->roleColumnMetadata = [
+            'flexible' => true,
+            'allowed' => [],
+        ];
+
+        return $this->roleColumnMetadata;
     }
 }
