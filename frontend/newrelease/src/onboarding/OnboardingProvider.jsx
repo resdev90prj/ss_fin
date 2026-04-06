@@ -2,8 +2,13 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../lib/apiClient';
+import { getEffectiveModules } from '../lib/access';
 import OnboardingTour from './OnboardingTour';
-import { onboardingChecklistConfig, onboardingTourSteps } from './onboardingConfig';
+import {
+  filterOnboardingChecklistConfig,
+  filterOnboardingTourSteps,
+  onboardingTourSteps,
+} from './onboardingConfig';
 
 const OnboardingContext = createContext({
   checklist: {
@@ -28,7 +33,8 @@ const OnboardingContext = createContext({
 });
 
 function buildChecklistState(stats = {}, extra = {}) {
-  const items = onboardingChecklistConfig.map((item) => ({
+  const checklistConfig = Array.isArray(extra.checklistConfig) ? extra.checklistConfig : [];
+  const items = checklistConfig.map((item) => ({
     ...item,
     completed: item.isComplete(stats),
   }));
@@ -51,8 +57,8 @@ function buildChecklistState(stats = {}, extra = {}) {
   };
 }
 
-function emptyChecklistState() {
-  return buildChecklistState({}, { loading: true });
+function emptyChecklistState(checklistConfig = []) {
+  return buildChecklistState({}, { checklistConfig, loading: true });
 }
 
 function onboardingStorageKey(session) {
@@ -70,10 +76,13 @@ export function OnboardingProvider({ children }) {
   const [tourCompleted, setTourCompleted] = useState(true);
   const [autoStartPending, setAutoStartPending] = useState(false);
   const [queuedStepIndex, setQueuedStepIndex] = useState(null);
+  const availableModules = useMemo(() => getEffectiveModules(session), [session]);
+  const steps = useMemo(() => filterOnboardingTourSteps(availableModules), [availableModules]);
+  const checklistConfig = useMemo(() => filterOnboardingChecklistConfig(availableModules), [availableModules]);
 
   const storageKey = useMemo(() => onboardingStorageKey(session), [session]);
   const isAuthenticated = Boolean(session.authenticated);
-  const currentStep = onboardingTourSteps[currentStepIndex] || onboardingTourSteps[0];
+  const currentStep = steps[currentStepIndex] || steps[0] || null;
 
   function markTourAsSeen() {
     window.localStorage.setItem(storageKey, 'done');
@@ -82,7 +91,7 @@ export function OnboardingProvider({ children }) {
 
   async function refreshProgress(signal) {
     if (!isAuthenticated) {
-      setChecklist(emptyChecklistState());
+      setChecklist(emptyChecklistState(checklistConfig));
       return;
     }
 
@@ -94,7 +103,7 @@ export function OnboardingProvider({ children }) {
 
     try {
       const response = await apiRequest('/onboarding/summary', { signal });
-      setChecklist(buildChecklistState(response.data?.stats || {}));
+      setChecklist(buildChecklistState(response.data?.stats || {}, { checklistConfig }));
     } catch (requestError) {
       if (requestError.name !== 'AbortError') {
         setChecklist((current) => ({
@@ -107,7 +116,7 @@ export function OnboardingProvider({ children }) {
   }
 
   function openTour(stepIndex = 0) {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || steps.length === 0) {
       return;
     }
 
@@ -133,12 +142,12 @@ export function OnboardingProvider({ children }) {
   }
 
   function nextTourStep() {
-    if (currentStepIndex >= onboardingTourSteps.length - 1) {
+    if (currentStepIndex >= steps.length - 1) {
       closeTour();
       return;
     }
 
-    setCurrentStepIndex((index) => Math.min(index + 1, onboardingTourSteps.length - 1));
+    setCurrentStepIndex((index) => Math.min(index + 1, steps.length - 1));
   }
 
   function skipTour() {
@@ -151,7 +160,7 @@ export function OnboardingProvider({ children }) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setChecklist(emptyChecklistState());
+      setChecklist(emptyChecklistState(checklistConfig));
       setIsTourOpen(false);
       setCurrentStepIndex(0);
       setTourCompleted(true);
@@ -162,8 +171,8 @@ export function OnboardingProvider({ children }) {
 
     const alreadySeen = window.localStorage.getItem(storageKey) === 'done';
     setTourCompleted(alreadySeen);
-    setAutoStartPending(!alreadySeen);
-  }, [isAuthenticated, storageKey]);
+    setAutoStartPending(!alreadySeen && steps.length > 0);
+  }, [checklistConfig, isAuthenticated, steps.length, storageKey]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -173,7 +182,7 @@ export function OnboardingProvider({ children }) {
     const controller = new AbortController();
     refreshProgress(controller.signal);
     return () => controller.abort();
-  }, [isAuthenticated, location.pathname, session.scope?.current_user_id]);
+  }, [checklistConfig, isAuthenticated, location.pathname, session.scope?.current_user_id]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -189,7 +198,7 @@ export function OnboardingProvider({ children }) {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated || tourCompleted || isTourOpen || !autoStartPending || location.pathname !== '/') {
+    if (!isAuthenticated || tourCompleted || isTourOpen || !autoStartPending || location.pathname !== '/' || steps.length === 0) {
       return undefined;
     }
 
@@ -202,7 +211,7 @@ export function OnboardingProvider({ children }) {
     }, 280);
 
     return () => window.clearTimeout(timeoutId);
-  }, [autoStartPending, isAuthenticated, isTourOpen, location.pathname, tourCompleted]);
+  }, [autoStartPending, isAuthenticated, isTourOpen, location.pathname, steps.length, tourCompleted]);
 
   useEffect(() => {
     if (queuedStepIndex === null || location.pathname !== '/') {
@@ -219,9 +228,22 @@ export function OnboardingProvider({ children }) {
     return () => window.clearTimeout(timeoutId);
   }, [queuedStepIndex, location.pathname]);
 
+  useEffect(() => {
+    if (steps.length === 0) {
+      setCurrentStepIndex(0);
+      setQueuedStepIndex(null);
+      setIsTourOpen(false);
+      return;
+    }
+
+    if (currentStepIndex >= steps.length) {
+      setCurrentStepIndex(steps.length - 1);
+    }
+  }, [currentStepIndex, steps.length]);
+
   const value = {
     checklist,
-    steps: onboardingTourSteps,
+    steps,
     isTourOpen,
     currentStepIndex,
     currentStep,

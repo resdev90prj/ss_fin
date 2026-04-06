@@ -5,8 +5,9 @@ import {
   ChevronRight,
   Menu,
 } from 'lucide-react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getNavigationModules, getRoleLabel } from '../lib/access';
 import { cn } from '../lib/utils';
 import { getNavigationGroups, moduleRegistry } from '../navigation/menu';
 import { useOnboarding } from '../onboarding/OnboardingProvider';
@@ -18,6 +19,7 @@ const defaultCollapsedGroups = {
   planning: false,
   operations: false,
   analysis: false,
+  management: false,
   account: false,
   admin: false,
 };
@@ -116,17 +118,34 @@ export default function AppShell() {
   const location = useLocation();
   const currentUser = session.user;
   const scope = session.scope || {};
-  const isAdmin = currentUser?.role === 'admin' || scope.is_admin;
   const pathname = location.pathname || '/';
   const [collapsedGroups, setCollapsedGroups] = useState(defaultCollapsedGroups);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuOpenedByTourRef = useRef(false);
+  const visibleModuleKeys = useMemo(() => getNavigationModules(session), [session]);
+  const visibleModuleSet = useMemo(() => new Set(visibleModuleKeys), [visibleModuleKeys]);
 
-  const navigationGroups = useMemo(() => getNavigationGroups({ isAdmin }), [isAdmin]);
+  const navigationGroups = useMemo(
+    () => getNavigationGroups({ visibleModuleKeys }),
+    [visibleModuleKeys],
+  );
 
   const currentModule = useMemo(() => {
     return Object.values(moduleRegistry).find((item) => routeIsActive(pathname, item.path)) || moduleRegistry.dashboard;
   }, [pathname]);
+
+  const firstAvailableItem = useMemo(() => {
+    return Object.values(moduleRegistry).find((item) => (
+      item.status === 'live'
+      && (item.requiredModules || []).every((moduleKey) => visibleModuleSet.has(moduleKey))
+    )) || moduleRegistry.dashboard;
+  }, [visibleModuleSet]);
+
+  const currentModuleVisible = (currentModule.requiredModules || []).every((moduleKey) => visibleModuleSet.has(moduleKey));
+
+  if (currentModule.status === 'live' && !currentModuleVisible) {
+    return <Navigate to={firstAvailableItem.path} replace />;
+  }
 
   function toggleGroup(groupKey) {
     setCollapsedGroups((current) => ({
@@ -235,8 +254,8 @@ export default function AppShell() {
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                   <strong className="block text-sm font-semibold text-slate-950">{currentUser?.name || 'Usuario'}</strong>
                   <span className="text-xs text-slate-500">
-                    {currentUser?.role === 'admin' ? 'Administrador' : 'Usuario'}
-                    {scope.scoped_user_id ? ` | Visao ${scope.scoped_user_id}` : ''}
+                    {getRoleLabel(currentUser)}
+                    {scope.is_scoped ? ` | Visao ${scope.current_user_name || scope.scoped_user_id}` : ''}
                   </span>
                 </div>
               </div>

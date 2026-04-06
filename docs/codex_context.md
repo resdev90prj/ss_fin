@@ -3,7 +3,7 @@
 ## Visao geral do projeto
 - Sistema financeiro web em PHP para gestao de contas, transacoes, dividas, metas, orcamentos e importacoes.
 - Implementacao atual em MVC simples, sem framework full-stack.
-- Suporte multiusuario com isolamento de dados por login e perfil (`admin` e `user`).
+- Suporte multiusuario com isolamento de dados por login, perfil (`admin`, `gestor_financeiro` e `user`) e habilitacao modular por usuario.
 - Modulo de planejamento estruturado implementado: `Alvos, Objetivos e Execucao`.
 - Classificacao automatica de categorias implementada em transacoes e importacoes com base no historico do proprio usuario (sem API externa).
 - Dashboard evoluido com `Central de Execucao` para destacar alertas de prazo e prioridades de acoes do alvo ativo.
@@ -11,7 +11,8 @@
 - Score de Execucao Semanal implementado no dashboard com comparacao semanal e historico de evolucao.
 - Central de Alertas implementada com envio de digest por e-mail e arquitetura desacoplada pronta para futuro provider de WhatsApp.
 - Modo Privacidade Visual implementado no dashboard para ocultar rapidamente valores financeiros em tela.
-- Contexto atualizado em: 2026-04-01.
+- Perfis e permissoes modulares da newrelease implementados para operacao de consultores/gestores financeiros com carteira de clientes.
+- Contexto atualizado em: 2026-04-06.
 
 ## Objetivo do sistema
 - Centralizar fluxo financeiro PF/PJ com visao operacional e analitica.
@@ -58,22 +59,49 @@
 - `favicon.ico` (raiz) e `public_html/favicon.ico`: fallback de favicon para evitar icone padrao do ambiente.
 - `docs/react_parallel_release.md`: guia da migracao paralela React + API + publicacao/rollback.
 
+## Perfis e permissoes modulares
+- Papel novo: `gestor_financeiro`, autenticado pela mesma sessao PHP atual e com leitura de permissao centralizada no backend.
+- Relacao gestor -> cliente implementada no dominio de usuarios por `users.manager_user_id`.
+- Habilitacao modular por usuario implementada em tabela dedicada `user_module_access`, evitando regra hardcoded apenas por role e permitindo evolucao futura por cliente.
+- Modulos base sempre disponiveis para usuario autenticado: `dashboard` e `profile`.
+- Modulos configuraveis atuais da newrelease: `accounts`, `boxes`, `categories`, `transactions`, `withdrawals`, `debts`, `budgets`, `planning`, `imports` e `reports`.
+- Modulos de navegacao do ator logado sao tratados separadamente dos modulos efetivos do usuario em escopo, permitindo que `admin` e `gestor_financeiro` mantenham acesso a gestao de usuarios/clientes mesmo quando operam visualmente no escopo de um cliente.
+- `admin`:
+  - mantem visao global;
+  - pode criar `admin`, `gestor_financeiro` e `user`;
+  - pode definir gestor responsavel e modulos habilitados de qualquer usuario;
+  - pode trocar escopo visual para qualquer usuario.
+- `gestor_financeiro`:
+  - enxerga e administra apenas usuarios `user` vinculados ao proprio `manager_user_id`;
+  - pode criar e editar clientes subordinados;
+  - pode configurar modulos apenas dos clientes sob sua gestao;
+  - nao pode escalar privilegios para `admin` nem acessar clientes de outro gestor;
+  - pode trocar escopo visual apenas para clientes sob sua carteira.
+- `user` vinculado a gestor:
+  - acessa apenas o proprio escopo;
+  - quando nao houver configuracao modular explicita, inicia com experiencia simplificada em `dashboard` + `profile`;
+  - pode receber modulos adicionais individualmente sem mudar o role.
+- `user` nao vinculado a gestor preserva comportamento legado e permanece com acesso integral aos modulos configuraveis na ausencia de regras explicitas, reduzindo risco de regressao para a base atual.
+
 ## Modulos principais
 - Autenticacao: login/logout por sessao.
-- Usuarios (`users`): gestao administrativa de usuarios (listar, criar, editar, ativar/desativar, reset/alteracao de senha com confirmacao, troca de escopo de visualizacao) e area de autoatendimento `Meu acesso` para atualizar nome/e-mail e trocar a propria senha com validacao da senha atual.
+- Usuarios (`users`): gestao administrativa de usuarios (listar, criar, editar, ativar/desativar, reset/alteracao de senha com confirmacao, troca de escopo de visualizacao), configuracao de modulos habilitados por usuario e area de autoatendimento `Meu acesso` para atualizar nome/e-mail e trocar a propria senha com validacao da senha atual.
 - Dashboard: KPIs por competencia, evolucao e projecoes com parcelas + `Central de Execucao` (sino de notificacoes, atencao imediata, proximas acoes, painel lateral de execucao e indicadores operacionais) + bloco `Agenda de Hoje` + `Modo Privacidade` para ocultacao visual de valores financeiros.
 - Release React paralela (`newrelease`):
   - layout base com navegacao protegida;
-  - menu React reorganizado por dominios (`Visao geral`, `Financeiro`, `Planejamento`, `Operacao`, `Analise`, `Conta` e `Admin` quando aplicavel), espelhando o mapa funcional do legado para evitar regressao de produto;
+  - menu React reorganizado por dominios (`Visao geral`, `Financeiro`, `Planejamento`, `Operacao`, `Analise`, `Conta` e `Gestao`/`Admin` quando aplicavel), espelhando o mapa funcional do legado para evitar regressao de produto;
   - login React consumindo sessao PHP;
-  - dashboard React com resumo financeiro, central de execucao, agenda, score semanal, modo privacidade e nova hierarquia visual SaaS baseada em cards, contrastes fortes e graficos leves;
-  - modulos com fluxo funcional em React para `accounts`, `boxes`, `categories`, `transactions`, `withdrawals`, `debts`, `budgets`, `goals`, `targets`, `agenda`, `imports`, `reports`, `profile` e `users` (admin), cobrindo leitura e principais acoes operacionais sem sair de `/newrelease`;
+  - dashboard React com resumo financeiro, central de execucao, agenda, score semanal, modo privacidade e degradacao resiliente quando `planning` estiver desabilitado;
+  - modulos com fluxo funcional em React para `accounts`, `boxes`, `categories`, `transactions`, `withdrawals`, `debts`, `budgets`, `goals`, `targets`, `agenda`, `imports`, `reports`, `profile`, `users` (admin) e `manager-clients` (`Gestor Financeiro`), cobrindo leitura e principais acoes operacionais sem sair de `/newrelease`;
+  - composicao de menu, rotas e blocos visuais baseada em `role`, `scope`, `capabilities`, `navigation_modules` e `effective_modules` recebidos de `/api/me`;
   - interface em fase de homologacao com limpeza de microcopy para linguagem oficial de produto, sem textos de migracao, ambiente paralelo ou bastidores tecnicos expostos ao usuario final;
   - experiencia da nova release sem botao "abrir no legado", sem redirects para views PHP antigas e sem placeholders de navegacao para os itens presentes no menu.
 - API JSON paralela (`api`):
   - endpoints para autenticacao, sessao, dashboard, contas, caixas, categorias, transacoes, orcamentos, metas, relatorios, importacoes, dividas, perfil do usuario e administracao de usuarios;
+  - `GET /api/me` retorna `role`, `scope`, `management`, `navigation_modules`, `effective_modules` e capacidades do ator logado para orquestrar a newrelease sem mover autorizacao para o React;
   - resposta padronizada `{ success, message, data, errors }`;
-  - middleware proprio baseado na mesma sessao PHP do legado.
+  - middleware proprio baseado na mesma sessao PHP do legado;
+  - bloqueio backend por escopo e por modulo habilitado, inclusive para dashboard, onboarding, transacoes/retiradas, gestao de usuarios e demais rotas mapeadas.
 - Agenda (`agenda_execution`): tela expandida da execucao diaria com ordenacao automatica das acoes abertas do usuario.
 - Score semanal: bloco `Score de Execucao Semanal` no dashboard com nota `0-100`, classificacao interpretativa, comparacao com semana anterior e historico visual das ultimas semanas.
 - Central de Alertas (`alerts`):
@@ -118,12 +146,20 @@
 - Na API paralela, apenas `GET /api/me` pode responder sem sessao autenticada; endpoints de dados exigem sessao valida.
 - Sessao valida usuario ativo a cada requisicao protegida; usuarios inativos perdem acesso imediatamente.
 - Permissoes de acesso:
-  - apenas admin pode listar todos os usuarios, criar novo acesso, editar outros usuarios e ativar/desativar usuarios;
+  - `admin` pode listar todos os usuarios, criar novo acesso, editar outros usuarios, ativar/desativar usuarios, definir modulos habilitados e operar escopo global;
+  - `gestor_financeiro` pode listar e administrar apenas clientes (`user`) vinculados ao proprio `manager_user_id`, incluindo criacao, edicao, reset de senha, ativacao/desativacao, configuracao modular e troca de escopo visual;
+  - `gestor_financeiro` nao pode criar/editar `admin`, nao pode criar outro gestor fora das regras do admin e nao pode acessar clientes de outro gestor;
   - usuario autenticado pode atualizar apenas os proprios dados basicos (`Meu acesso`) e trocar a propria senha mediante confirmacao da senha atual;
   - desativacao do proprio usuario logado via tela administrativa permanece bloqueada para evitar perda de acesso.
 - Isolamento por login:
   - usuario comum acessa apenas os dados vinculados ao proprio `user_id`;
-  - admin pode operar em escopo proprio ou em escopo de outro usuario (contexto de visualizacao), sem trocar identidade de login.
+  - admin pode operar em escopo proprio ou em escopo de outro usuario (contexto de visualizacao), sem trocar identidade de login;
+  - gestor financeiro pode operar em escopo proprio ou no escopo visual de clientes sob sua carteira, tambem sem trocar identidade de login.
+- Permissoes modulares:
+  - frontend oculta menu, atalhos, checklist de onboarding e blocos do dashboard conforme `effective_modules`;
+  - backend bloqueia acesso real a rotas legacy e endpoints `/api` quando o modulo nao estiver habilitado;
+  - `planning` passa a encapsular metas, alvos, agenda de execucao, score semanal e blocos derivados do dashboard/onboarding;
+  - com `planning` desabilitado, o dashboard deve continuar funcional com KPIs financeiros, esconder blocos dependentes e retornar flags de recurso para o React degradar a interface sem erro.
 - Acoes de escrita em modulos financeiros validam propriedade de referencias (`account_id`, `category_id`, `box_id`) para evitar IDOR indireto.
 - A release React usa a mesma sessao do legado com `credentials: include`; permissoes continuam no backend e nunca no frontend.
 - A nova release React deve entregar experiencia continua em `/newrelease`; se um modulo aparece no menu, seu fluxo principal precisa existir dentro da propria interface, sem redirecionamento para o legado.
@@ -199,6 +235,7 @@
 - `PDO::ATTR_EMULATE_PREPARES = false` (placeholders devem ser tratados com cuidado).
 - Escaping de saida com helper `e()`.
 - Flash messages por sessao.
+- Autorizacao nova centralizada em `includes/access.php`, com helpers reutilizaveis para resolver escopo atual, modulos efetivos, modulos de navegacao e capacidade de um ator gerenciar outro usuario.
 - Frontend React usa `fetch` com `credentials: include`, Router em subpasta, Tailwind CSS com design tokens locais, componentes base no estilo shadcn/ui, lazy loading por rota e build estatico com `base=/newrelease/`.
 - Durante a homologacao da release React, textos e elementos visuais devem priorizar contexto de uso do produto; referencias a migracao, stack, backend, release paralela ou detalhes tecnicos nao devem aparecer na interface final.
 - Cada item relevante do menu da nova release deve possuir rota funcional no React; bridges, redirects e placeholders para modulos do legado nao fazem parte da experiencia final esperada.
@@ -219,11 +256,14 @@
 ## Arquivos criticos
 - Entrada e roteamento: [index.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/index.php)
 - API paralela: [public_html/api/index.php](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/public_html/api/index.php), [includes/api/functions.php](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/includes/api/functions.php)
+- Controle de acesso/permissoes: [includes/access.php](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/includes/access.php), [includes/auth.php](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/includes/auth.php)
 - Frontend paralelo: [frontend/newrelease/vite.config.js](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/vite.config.js), [frontend/newrelease/src/App.jsx](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/src/App.jsx), [public_html/newrelease/index.html](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/public_html/newrelease/index.html)
+- Gestao React de usuarios/clientes: [frontend/newrelease/src/features/users/UsersPage.jsx](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/src/features/users/UsersPage.jsx), [frontend/newrelease/src/features/users/ManagerClientsPage.jsx](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/src/features/users/ManagerClientsPage.jsx), [frontend/newrelease/src/features/users/UserModuleSelector.jsx](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/frontend/newrelease/src/features/users/UserModuleSelector.jsx)
 - Guia da migracao paralela: [docs/react_parallel_release.md](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/docs/react_parallel_release.md)
 - Config app/DB: [includes/config.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/config.php), [includes/db.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/db.php)
 - Auth/helpers: [includes/auth.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/auth.php), [includes/helpers.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/helpers.php)
 - Usuarios/perfis: [controllers/UserController.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/controllers/UserController.php), [models/User.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/models/User.php), [views/users/index.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/views/users/index.php)
+- Patch SQL de acesso modular: [database/patches/20260406_financial_manager_access.sql](/C:/Users/RenanEduardoSilva/Downloads/PROJETO_SAAS_IA_FINAN/NEW_SAAS/ss_fin/database/patches/20260406_financial_manager_access.sql)
 - Alertas:
   - controller: [controllers/AlertController.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/controllers/AlertController.php)
   - service: [includes/AlertCenterService.php](/C:/xampp/htdocs/PROJETO_SAAS_IA_FINAN/includes/AlertCenterService.php)
@@ -249,8 +289,11 @@
 - Nao mover o legado para `app_legacy` agora; a fase atual da migracao paralela mantem o sistema validado exatamente onde esta.
 - Criar a nova UI React em subpasta (`/newrelease`) e a nova API em subpasta (`/api`) para validar em producao sem virada imediata.
 - Manter o backend, a sessao e as regras de autorizacao no PHP; React atua apenas como camada de interface.
+- Separar `navigation_modules` (ator logado) de `effective_modules` (usuario em escopo) para permitir operacao administrativa/consultiva sem furar o isolamento do cliente.
+- Implementar personalizacao modular por usuario em tabela dedicada (`user_module_access`) em vez de hardcode no menu ou coluna JSON, priorizando manutencao e bloqueio backend consistente.
 - Manter segregacao de dados em todos os modulos via `user_id`, sem criar nova camada de autorizacao externa.
 - Implementar contexto de visualizacao para admin no proprio `includes/auth.php` (escopo em sessao), evitando duplicar controllers/views para modo admin.
+- Estender o contexto de visualizacao tambem para `gestor_financeiro`, sempre restrito aos clientes vinculados ao proprio escopo.
 - Implementar modulo de planejamento como subdominio interno no mesmo MVC (sem camada paralela), com regras de execucao no controller/model e visualizacao hierarquica nas views.
 - Reaproveitar dashboard existente para exibir resumo do planejamento ativo e evoluir para `Central de Execucao`, sem criar modulo separado.
 - Reaproveitar o mesmo fluxo MVC para disponibilizar a Agenda de Execucao via rota dedicada (`index.php?route=agenda_execution`) e bloco resumido no dashboard, sem nova camada arquitetural.
@@ -289,10 +332,11 @@
 - Confirmar estrategia de execucao periodica da fila OFX em producao.
 - Definir cron de producao para `includes/process_alerts.php` conforme frequencia desejada.
 - Implementar provider real de WhatsApp quando credenciais/API estiverem definidas.
+- Homologar manualmente os cenarios `admin global`, `gestor_financeiro com carteira propria` e `cliente dashboard-only` em ambiente com schema atualizado.
 
 ## Proximos passos sugeridos
-1. Executar regressao manual fim a fim dos modulos React migrados, com foco em transacoes, contas, categorias, caixas, importacao e dividas.
-2. Validar cobertura de CSRF e autorizacao para todas as rotas mutaveis novas da API paralela.
-3. Avaliar code splitting do bundle React para reduzir o chunk principal gerado pelo Vite.
-4. Definir rotina cron para `includes/process_ofx_queue.php` e `includes/process_alerts.php`.
-5. Iniciar suite minima de testes para regras de divida, deduplicacao OFX, notificacoes e API paralela.
+1. Homologar o ciclo completo de administracao de clientes pelo menu `Gestor Financeiro`, incluindo criacao, edicao, reset de senha, troca de escopo e filtros por gestor.
+2. Executar regressao manual fim a fim dos modulos React migrados, com foco em comportamento quando modulos estiverem desabilitados (`planning`, `imports`, `reports`, etc.).
+3. Validar cobertura de CSRF e autorizacao para todas as rotas mutaveis novas da API paralela.
+4. Avaliar code splitting do bundle React para reduzir o chunk principal gerado pelo Vite.
+5. Definir rotina cron para `includes/process_ofx_queue.php` e `includes/process_alerts.php`.

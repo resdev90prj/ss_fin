@@ -361,7 +361,7 @@ class UserController
 
     public function scope(): void
     {
-        require_admin();
+        require_user_management_access();
 
         if (!verify_csrf($_POST['_csrf'] ?? null)) {
             flash('error', 'Token CSRF invalido.');
@@ -374,10 +374,16 @@ class UserController
             redirect('index.php?route=users');
         }
 
-        $target = (new User())->findById($userId);
+        $actor = access_current_actor_record();
+        $target = (new User())->findByIdDetailed($userId);
         if (!$target) {
             flash('error', 'Usuario nao encontrado para escopo.');
             redirect('index.php?route=users');
+        }
+
+        if (!$actor || !access_can_scope_to_target_user($actor, $target)) {
+            flash('error', 'Este usuario esta fora do seu escopo de visualizacao.');
+            redirect('index.php?route=dashboard');
         }
 
         set_scope_user_id($userId);
@@ -387,7 +393,7 @@ class UserController
 
     public function clearScope(): void
     {
-        require_admin();
+        require_user_management_access();
 
         if (!verify_csrf($_POST['_csrf'] ?? null)) {
             flash('error', 'Token CSRF invalido.');
@@ -401,7 +407,11 @@ class UserController
 
     private function normalizeRole(string $role): string
     {
-        return $role === 'admin' ? 'admin' : 'user';
+        if (in_array($role, ['admin', 'gestor_financeiro', 'user'], true)) {
+            return $role;
+        }
+
+        return 'user';
     }
 
     private function normalizeStatus(string $status): int

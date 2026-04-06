@@ -23,6 +23,7 @@ const ImportsPage = lazy(() => import('./features/imports/ImportsPage'));
 const ReportsPage = lazy(() => import('./features/reports/ReportsPage'));
 const ProfilePage = lazy(() => import('./features/profile/ProfilePage'));
 const UsersPage = lazy(() => import('./features/users/UsersPage'));
+const ManagerClientsPage = lazy(() => import('./features/users/ManagerClientsPage'));
 
 const routerBase = import.meta.env.BASE_URL === '/'
   ? '/'
@@ -60,6 +61,7 @@ export default function App() {
                   <Route path="/agenda" element={<AgendaPage />} />
                   <Route path="/imports" element={<ImportsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
+                  <Route path="/manager-clients" element={<ManagerClientsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/users" element={<UsersPage />} />
                 </Route>

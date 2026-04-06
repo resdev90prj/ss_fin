@@ -24,6 +24,7 @@ $loggedUserId = (int)($loggedUserId ?? 0);
   <input type="password" name="confirm_password" placeholder="Confirmar senha" minlength="6" required class="border rounded p-2">
   <select name="role" class="border rounded p-2">
     <option value="user">user</option>
+    <option value="gestor_financeiro">gestor_financeiro</option>
     <option value="admin">admin</option>
   </select>
   <select name="status" class="border rounded p-2">
@@ -82,6 +83,7 @@ $loggedUserId = (int)($loggedUserId ?? 0);
             <input name="email" type="email" value="<?= e($u['email']) ?>" class="border rounded p-1 w-full" required>
             <select name="role" class="border rounded p-1 w-full">
               <option value="user" <?= $u['role'] === 'user' ? 'selected' : '' ?>>user</option>
+              <option value="gestor_financeiro" <?= $u['role'] === 'gestor_financeiro' ? 'selected' : '' ?>>gestor_financeiro</option>
               <option value="admin" <?= $u['role'] === 'admin' ? 'selected' : '' ?>>admin</option>
             </select>
             <select name="status" class="border rounded p-1 w-full">

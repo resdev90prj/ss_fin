@@ -9,13 +9,15 @@ import { useOnboarding } from './OnboardingProvider';
 
 export default function OnboardingChecklist() {
   const navigate = useNavigate();
-  const { checklist, startTour } = useOnboarding();
+  const { checklist, startTour, steps } = useOnboarding();
+  const hasChecklistItems = checklist.items.length > 0;
+  const canStartTour = steps.length > 0;
 
   return (
     <SectionCard
       title="Comece por aqui"
       action={(
-        <Button type="button" variant="outline" size="sm" onClick={() => startTour(0)}>
+        <Button type="button" variant="outline" size="sm" onClick={() => startTour(0)} disabled={!canStartTour}>
           <CirclePlay className="h-4 w-4" />
           Tour
         </Button>
@@ -25,10 +27,12 @@ export default function OnboardingChecklist() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-950">
-            {checklist.completedCount}/{checklist.totalCount} concluido
+            {hasChecklistItems ? `${checklist.completedCount}/${checklist.totalCount} concluido` : 'Acesso inicial pronto'}
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            Siga o proximo passo para colocar o sistema em uso.
+            {hasChecklistItems
+              ? 'Siga o proximo passo para colocar o sistema em uso.'
+              : 'O painel foi ajustado para mostrar apenas os modulos liberados neste acesso.'}
           </p>
         </div>
 
@@ -43,48 +47,55 @@ export default function OnboardingChecklist() {
         </div>
       ) : null}
 
-      <div className="grid gap-3">
-        {checklist.items.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => navigate(item.path)}
-            className={cn(
-              'flex w-full items-center justify-between gap-4 rounded-[24px] border px-4 py-4 text-left transition-all',
-              item.completed
-                ? 'border-emerald-200 bg-emerald-50/70'
-                : item.isNextStep
-                  ? 'border-blue-200 bg-blue-50/80 shadow-sm'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
-            )}
-          >
-            <div className="flex min-w-0 items-start gap-3">
-              {item.completed ? (
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-              ) : (
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300">
-                  <span className="h-2 w-2 rounded-full bg-slate-300" />
-                </span>
+      {hasChecklistItems ? (
+        <div className="grid gap-3">
+          {checklist.items.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => navigate(item.path)}
+              className={cn(
+                'flex w-full items-center justify-between gap-4 rounded-[24px] border px-4 py-4 text-left transition-all',
+                item.completed
+                  ? 'border-emerald-200 bg-emerald-50/70'
+                  : item.isNextStep
+                    ? 'border-blue-200 bg-blue-50/80 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
               )}
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                {item.completed ? (
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                ) : (
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300">
+                    <span className="h-2 w-2 rounded-full bg-slate-300" />
+                  </span>
+                )}
 
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-950">{item.label}</p>
-                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
-                  Abrir {item.moduleLabel}
-                </p>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-950">{item.label}</p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
+                    Abrir {item.moduleLabel}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex shrink-0 items-center gap-2">
-              {item.isNextStep ? <Badge variant="info">Proximo passo</Badge> : null}
-              {item.completed ? <Badge variant="success">Concluido</Badge> : null}
-              <ArrowRight className="h-4 w-4 text-slate-400" />
-            </div>
-          </button>
-        ))}
-      </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {item.isNextStep ? <Badge variant="info">Proximo passo</Badge> : null}
+                {item.completed ? <Badge variant="success">Concluido</Badge> : null}
+                <ArrowRight className="h-4 w-4 text-slate-400" />
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+          Este acesso pode operar com uma experiencia mais enxuta. Assim que novos modulos forem habilitados, os proximos passos
+          aparecerao aqui automaticamente.
+        </div>
+      )}
 
-      {checklist.completedCount === checklist.totalCount ? (
+      {hasChecklistItems && checklist.completedCount === checklist.totalCount ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           Base inicial concluida. Agora e seguir operando no ritmo do negocio.
         </div>

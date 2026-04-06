@@ -211,6 +211,31 @@ function api_require_admin(): array
     return $user;
 }
 
+function api_require_user_management_access(): array
+{
+    $user = api_require_login();
+    if (!can_manage_users()) {
+        api_json_response(false, 'Acesso restrito a administradores e gestores financeiros.', [], ['Permissao insuficiente para gerir usuarios.'], 403);
+    }
+
+    return $user;
+}
+
+function api_require_module_access(string $moduleKey): array
+{
+    $user = api_require_login();
+    if (has_current_module_access($moduleKey)) {
+        return $user;
+    }
+
+    $catalog = access_assignable_module_catalog();
+    $label = $catalog[$moduleKey]['label'] ?? ucfirst($moduleKey);
+
+    api_json_response(false, 'Modulo nao habilitado para o contexto atual.', [], [
+        'O acesso ao modulo ' . $label . ' nao esta liberado para este usuario.',
+    ], 403);
+}
+
 function api_verify_csrf_or_fail(?string $token): void
 {
     if (!verify_csrf($token)) {
@@ -223,6 +248,16 @@ function api_session_payload(): array
     $user = api_sync_authenticated_session();
     $config = api_config();
 
+    $actor = $user ? access_current_actor_record() : null;
+    $effectiveUser = $user ? access_effective_user_record() : null;
+    $loggedUserId = logged_user_id();
+    $currentUserId = current_user_id();
+    $scopedUserId = scoped_user_id();
+    $isScoped = $loggedUserId !== null && $currentUserId !== null && (int)$loggedUserId !== (int)$currentUserId;
+
+    $effectiveModules = $effectiveUser ? access_effective_modules_for_user($effectiveUser) : access_base_module_keys();
+    $navigationModules = $user ? access_current_navigation_modules() : access_base_module_keys();
+
     return [
         'authenticated' => $user !== null,
         'csrf_token' => csrf_token(),
@@ -231,12 +266,37 @@ function api_session_payload(): array
             'name' => (string)$user['name'],
             'email' => (string)$user['email'],
             'role' => (string)$user['role'],
+            'role_label' => access_role_label((string)$user['role']),
         ] : null,
         'scope' => [
-            'logged_user_id' => logged_user_id(),
-            'current_user_id' => current_user_id(),
-            'scoped_user_id' => scoped_user_id(),
+            'logged_user_id' => $loggedUserId,
+            'current_user_id' => $currentUserId,
+            'scoped_user_id' => $scopedUserId,
+            'is_scoped' => $isScoped,
             'is_admin' => is_admin(),
+            'is_financial_manager' => is_financial_manager(),
+            'can_use_visual_scope' => can_use_visual_scope(),
+            'current_user_name' => $effectiveUser ? (string)$effectiveUser['name'] : null,
+            'current_user_role' => $effectiveUser ? (string)$effectiveUser['role'] : null,
+            'current_user_role_label' => $effectiveUser ? access_role_label((string)$effectiveUser['role']) : null,
+            'manager_user_id' => $effectiveUser && !empty($effectiveUser['manager_user_id']) ? (int)$effectiveUser['manager_user_id'] : null,
+            'manager_name' => $effectiveUser ? ($effectiveUser['manager_name'] ?? null) : null,
+        ],
+        'permissions' => [
+            'effective_modules' => array_values($effectiveModules),
+            'navigation_modules' => array_values($navigationModules),
+            'capabilities' => access_management_capabilities($actor),
+        ],
+        'management' => [
+            'is_managed_client' => $effectiveUser ? access_user_is_managed_client($effectiveUser) : false,
+            'scoped_user' => $isScoped && $effectiveUser ? [
+                'id' => (int)$effectiveUser['id'],
+                'name' => (string)$effectiveUser['name'],
+                'role' => (string)$effectiveUser['role'],
+                'role_label' => access_role_label((string)$effectiveUser['role']),
+                'manager_user_id' => !empty($effectiveUser['manager_user_id']) ? (int)$effectiveUser['manager_user_id'] : null,
+                'manager_name' => $effectiveUser['manager_name'] ?? null,
+            ] : null,
         ],
         'release' => [
             'app_name' => (string)($config['app_name'] ?? 'SaaS IA Finan'),
@@ -254,6 +314,47 @@ function api_current_effective_user_id(): int
     }
 
     return (int)$currentUserId;
+}
+
+function api_required_module_for_path(string $path): ?string
+{
+    if ($path === '/dashboard/summary') {
+        return 'dashboard';
+    }
+
+    if (str_starts_with($path, '/accounts')) {
+        return 'accounts';
+    }
+
+    if (str_starts_with($path, '/boxes')) {
+        return 'boxes';
+    }
+
+    if (str_starts_with($path, '/categories')) {
+        return 'categories';
+    }
+
+    if (str_starts_with($path, '/budgets')) {
+        return 'budgets';
+    }
+
+    if (str_starts_with($path, '/goals') || str_starts_with($path, '/targets')) {
+        return 'planning';
+    }
+
+    if (str_starts_with($path, '/reports')) {
+        return 'reports';
+    }
+
+    if (str_starts_with($path, '/imports')) {
+        return 'imports';
+    }
+
+    if (str_starts_with($path, '/debts')) {
+        return 'debts';
+    }
+
+    return null;
 }
 
 function api_normalize_month(?string $input): string

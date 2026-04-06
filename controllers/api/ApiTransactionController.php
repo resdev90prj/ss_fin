@@ -23,6 +23,16 @@ class ApiTransactionController
             'account_id' => trim((string)($_GET['account_id'] ?? '')),
         ];
 
+        if ($filters['type'] === 'partner_withdrawal') {
+            api_require_module_access('withdrawals');
+        } else {
+            api_require_module_access('transactions');
+
+            if (!has_current_module_access('withdrawals')) {
+                $filters['exclude_types'] = ['partner_withdrawal'];
+            }
+        }
+
         $transactionModel = new Transaction();
         $items = $transactionModel->listByUser($userId, $filters, $prioritizeOthers);
         $othersPendingCount = $transactionModel->countOthersPending($userId, $filters);
@@ -72,6 +82,7 @@ class ApiTransactionController
     public function suggestCategory(): void
     {
         api_require_login();
+        api_require_module_access('transactions');
 
         $userId = api_current_effective_user_id();
         $description = trim((string)($_GET['description'] ?? ''));
@@ -98,6 +109,7 @@ class ApiTransactionController
     public function autoClassifyOthers(): void
     {
         api_require_login();
+        api_require_module_access('transactions');
         $payload = api_request_data();
         api_verify_csrf_or_fail($payload['csrf_token'] ?? $payload['_csrf'] ?? null);
 
@@ -114,6 +126,9 @@ class ApiTransactionController
         api_require_login();
         $payload = api_request_data();
         api_verify_csrf_or_fail($payload['csrf_token'] ?? $payload['_csrf'] ?? null);
+
+        $requestedType = $this->normalizeType((string)($payload['type'] ?? 'expense'));
+        $this->requireAccessForType($requestedType);
 
         $userId = api_current_effective_user_id();
         $payload['user_id'] = $userId;
@@ -137,11 +152,15 @@ class ApiTransactionController
 
         $userId = api_current_effective_user_id();
         $id = (int)($payload['id'] ?? 0);
-        if ($id <= 0 || !(new Transaction())->find($id, $userId)) {
+        $existingTransaction = $id > 0 ? (new Transaction())->find($id, $userId) : null;
+        if ($id <= 0 || !$existingTransaction) {
             api_json_response(false, 'Transacao nao encontrada.', [], ['Transacao invalida para o usuario atual.'], 404);
         }
 
+        $this->requireAccessForType((string)($existingTransaction['type'] ?? 'expense'));
+
         $data = $this->validatedPayload($payload, false);
+        $this->requireAccessForType((string)($data['type'] ?? 'expense'));
         (new Transaction())->update($id, $userId, $data);
 
         api_json_response(true, 'Transacao atualizada com sucesso.');
@@ -155,9 +174,12 @@ class ApiTransactionController
 
         $userId = api_current_effective_user_id();
         $id = (int)($payload['id'] ?? 0);
-        if ($id <= 0 || !(new Transaction())->find($id, $userId)) {
+        $existingTransaction = $id > 0 ? (new Transaction())->find($id, $userId) : null;
+        if ($id <= 0 || !$existingTransaction) {
             api_json_response(false, 'Transacao nao encontrada.', [], ['Transacao invalida para o usuario atual.'], 404);
         }
+
+        $this->requireAccessForType((string)($existingTransaction['type'] ?? 'expense'));
 
         (new Transaction())->delete($id, $userId);
 
@@ -241,5 +263,15 @@ class ApiTransactionController
     private function toBoolean(mixed $value): bool
     {
         return in_array(strtolower(trim((string)$value)), ['1', 'true', 'yes', 'on'], true);
+    }
+
+    private function requireAccessForType(string $type): void
+    {
+        if ($type === 'partner_withdrawal') {
+            api_require_module_access('withdrawals');
+            return;
+        }
+
+        api_require_module_access('transactions');
     }
 }

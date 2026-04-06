@@ -25,6 +25,7 @@ class ApiDashboardController
         $debtModel = new Debt();
         $installmentModel = new DebtInstallment();
         $targetModel = new Target();
+        $planningEnabled = has_current_module_access('planning');
 
         $summary = $this->safeCall(
             static fn(): array => $transactionModel->summaryMonth($userId, $month),
@@ -67,24 +68,34 @@ class ApiDashboardController
             'DebtInstallment::projectionDetailsByMonth',
             $userId
         );
-        $planning = $this->safeCall(
-            static fn(): array => $targetModel->dashboardData($userId),
-            $this->defaultPlanningData(),
-            'Target::dashboardData',
-            $userId
-        );
-        $agenda = $this->safeCall(
-            static fn(): array => $targetModel->executionAgendaData($userId, 120),
-            $this->defaultAgendaData(),
-            'Target::executionAgendaData',
-            $userId
-        );
-        $weeklyScore = $this->safeCall(
-            static fn(): array => $targetModel->executionWeeklyScoreData($userId, 8),
-            $this->defaultWeeklyScoreData(),
-            'Target::executionWeeklyScoreData',
-            $userId
-        );
+        $planning = $planningEnabled
+            ? $this->safeCall(
+                static fn(): array => $targetModel->dashboardData($userId),
+                $this->defaultPlanningData(),
+                'Target::dashboardData',
+                $userId
+            )
+            : $this->defaultPlanningData();
+        $agenda = $planningEnabled
+            ? $this->safeCall(
+                static fn(): array => $targetModel->executionAgendaData($userId, 120),
+                $this->defaultAgendaData(),
+                'Target::executionAgendaData',
+                $userId
+            )
+            : $this->defaultAgendaData();
+        $weeklyScore = $planningEnabled
+            ? $this->safeCall(
+                static fn(): array => $targetModel->executionWeeklyScoreData($userId, 8),
+                $this->defaultWeeklyScoreData(),
+                'Target::executionWeeklyScoreData',
+                $userId
+            )
+            : $this->defaultWeeklyScoreData();
+
+        $planning['enabled'] = $planningEnabled;
+        $agenda['enabled'] = $planningEnabled;
+        $weeklyScore['enabled'] = $planningEnabled;
         $transactionsEvolution = $this->safeCall(
             static fn(): array => $transactionModel->monthlyEvolutionRange($userId, $startMonth, $month),
             [],
@@ -124,6 +135,9 @@ class ApiDashboardController
             'planning' => $planning,
             'agenda' => $agenda,
             'weekly_score' => $weeklyScore,
+            'feature_flags' => [
+                'planning_enabled' => $planningEnabled,
+            ],
             'privacy' => [
                 'storage_key' => 'dashboard_privacy_mode',
                 'default_enabled' => false,
@@ -185,6 +199,7 @@ class ApiDashboardController
     private function defaultPlanningData(): array
     {
         return [
+            'enabled' => false,
             'active_target' => null,
             'active_objective' => null,
             'pending_actions' => 0,
@@ -230,6 +245,7 @@ class ApiDashboardController
     private function defaultAgendaData(): array
     {
         return [
+            'enabled' => false,
             'active_target' => null,
             'active_objective' => null,
             'summary' => [
@@ -250,6 +266,7 @@ class ApiDashboardController
     private function defaultWeeklyScoreData(): array
     {
         return [
+            'enabled' => false,
             'active_target' => null,
             'active_objective' => null,
             'current_week' => [
@@ -301,4 +318,3 @@ class ApiDashboardController
         ];
     }
 }
-

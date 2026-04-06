@@ -16,7 +16,7 @@ export const onboardingTourSteps = [
   {
     id: 'sidebar',
     title: 'Menu lateral',
-    description: 'Acesse contas, transacoes e planejamento por aqui.',
+    description: 'Acesse por aqui apenas os modulos liberados para este acesso.',
     targetSelector: '[data-onboarding-id="main-navigation"]',
     placement: 'right',
   },
@@ -26,6 +26,7 @@ export const onboardingTourSteps = [
     description: 'Registre entradas e saidas para refletir sua realidade.',
     targetSelector: '[data-onboarding-id="nav-transactions"]',
     placement: 'right',
+    requiredModules: ['transactions'],
   },
   {
     id: 'planning',
@@ -33,6 +34,7 @@ export const onboardingTourSteps = [
     description: 'Defina metas e acompanhe suas acoes.',
     targetSelector: '[data-onboarding-id="nav-targets"]',
     placement: 'right',
+    requiredModules: ['planning'],
   },
 ];
 
@@ -42,6 +44,7 @@ export const onboardingChecklistConfig = [
     label: 'Criar sua primeira conta',
     path: '/accounts',
     moduleLabel: 'Contas',
+    requiredModules: ['accounts'],
     isComplete: (stats) => Number(stats.accounts_count || 0) > 0,
   },
   {
@@ -49,6 +52,7 @@ export const onboardingChecklistConfig = [
     label: 'Registrar uma transacao',
     path: '/transactions',
     moduleLabel: 'Transacoes',
+    requiredModules: ['transactions'],
     isComplete: (stats) => Number(stats.transactions_count || 0) > 0,
   },
   {
@@ -56,6 +60,7 @@ export const onboardingChecklistConfig = [
     label: 'Criar um alvo',
     path: '/targets',
     moduleLabel: 'Planejamento',
+    requiredModules: ['planning'],
     isComplete: (stats) => Number(stats.targets_count || 0) > 0,
   },
   {
@@ -63,6 +68,7 @@ export const onboardingChecklistConfig = [
     label: 'Criar uma acao',
     path: '/targets',
     moduleLabel: 'Planejamento',
+    requiredModules: ['planning'],
     isComplete: (stats) => Number(stats.actions_count || 0) > 0,
   },
   {
@@ -70,6 +76,23 @@ export const onboardingChecklistConfig = [
     label: 'Concluir uma acao',
     path: '/agenda',
     moduleLabel: 'Agenda',
+    requiredModules: ['planning'],
     isComplete: (stats) => Number(stats.completed_actions_count || 0) > 0,
   },
 ];
+
+function itemMatchesModules(item, availableModules = []) {
+  if (!Array.isArray(item.requiredModules) || item.requiredModules.length === 0) {
+    return true;
+  }
+
+  return item.requiredModules.some((moduleKey) => availableModules.includes(moduleKey));
+}
+
+export function filterOnboardingTourSteps(availableModules = []) {
+  return onboardingTourSteps.filter((item) => itemMatchesModules(item, availableModules));
+}
+
+export function filterOnboardingChecklistConfig(availableModules = []) {
+  return onboardingChecklistConfig.filter((item) => itemMatchesModules(item, availableModules));
+}

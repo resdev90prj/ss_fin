@@ -71,6 +71,70 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $publicRoutes = ['login', 'login_submit'];
 if (!in_array($route, $publicRoutes, true)) {
     require_login();
+
+    $routeModules = [
+        'dashboard' => 'dashboard',
+        'accounts' => 'accounts',
+        'accounts_store' => 'accounts',
+        'accounts_update' => 'accounts',
+        'accounts_toggle' => 'accounts',
+        'boxes' => 'boxes',
+        'boxes_store' => 'boxes',
+        'boxes_update' => 'boxes',
+        'categories' => 'categories',
+        'categories_store' => 'categories',
+        'categories_update' => 'categories',
+        'categories_delete' => 'categories',
+        'transactions' => 'transactions',
+        'transactions_suggest_category' => 'transactions',
+        'transactions_auto_classify_others' => 'transactions',
+        'transactions_store' => 'transactions',
+        'transactions_update' => 'transactions',
+        'transactions_delete' => 'transactions',
+        'withdrawals' => 'withdrawals',
+        'withdrawals_store' => 'withdrawals',
+        'debts' => 'debts',
+        'debts_store' => 'debts',
+        'debts_show' => 'debts',
+        'debts_pay_installment' => 'debts',
+        'debts_refund_installment' => 'debts',
+        'debts_delete' => 'debts',
+        'debts_delete_installment' => 'debts',
+        'budgets' => 'budgets',
+        'budgets_store' => 'budgets',
+        'budgets_delete' => 'budgets',
+        'goals' => 'planning',
+        'goals_store' => 'planning',
+        'goals_update' => 'planning',
+        'goals_delete' => 'planning',
+        'targets' => 'planning',
+        'targets_show' => 'planning',
+        'targets_store' => 'planning',
+        'targets_update' => 'planning',
+        'targets_delete' => 'planning',
+        'targets_set_status' => 'planning',
+        'objectives_store' => 'planning',
+        'objectives_update' => 'planning',
+        'objectives_delete' => 'planning',
+        'objectives_set_status' => 'planning',
+        'decisions_store' => 'planning',
+        'decisions_update' => 'planning',
+        'decisions_delete' => 'planning',
+        'actions_store' => 'planning',
+        'actions_update' => 'planning',
+        'actions_delete' => 'planning',
+        'actions_toggle_done' => 'planning',
+        'agenda_execution' => 'planning',
+        'reports' => 'reports',
+        'imports' => 'imports',
+        'imports_upload' => 'imports',
+        'imports_process_ofx_queue' => 'imports',
+        'imports/process_ofx_queue' => 'imports',
+    ];
+
+    if (isset($routeModules[$route])) {
+        require_module_access($routeModules[$route]);
+    }
 }
 
 require_once __DIR__ . '/controllers/AuthController.php';

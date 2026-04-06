@@ -10,6 +10,31 @@ const emptySession = {
     current_user_id: null,
     scoped_user_id: null,
     is_admin: false,
+    is_financial_manager: false,
+    is_scoped: false,
+    current_user_name: null,
+    current_user_role: null,
+    current_user_role_label: null,
+    manager_user_id: null,
+    manager_name: null,
+  },
+  permissions: {
+    effective_modules: ['dashboard', 'profile'],
+    navigation_modules: ['dashboard', 'profile'],
+    capabilities: {
+      role: '',
+      role_label: '',
+      is_admin: false,
+      is_financial_manager: false,
+      can_manage_users: false,
+      can_access_user_admin: false,
+      can_access_manager_area: false,
+      can_use_visual_scope: false,
+    },
+  },
+  management: {
+    is_managed_client: false,
+    scoped_user: null,
   },
   release: {
     app_name: 'SaaS IA Finan',
@@ -41,6 +66,18 @@ export function AuthProvider({ children }) {
         ...emptySession.scope,
         ...(response.data?.scope || {}),
       },
+      permissions: {
+        ...emptySession.permissions,
+        ...(response.data?.permissions || {}),
+        capabilities: {
+          ...emptySession.permissions.capabilities,
+          ...(response.data?.permissions?.capabilities || {}),
+        },
+      },
+      management: {
+        ...emptySession.management,
+        ...(response.data?.management || {}),
+      },
       release: {
         ...emptySession.release,
         ...(response.data?.release || {}),
@@ -68,6 +105,18 @@ export function AuthProvider({ children }) {
         ...emptySession.scope,
         ...(response.data?.scope || {}),
       },
+      permissions: {
+        ...emptySession.permissions,
+        ...(response.data?.permissions || {}),
+        capabilities: {
+          ...emptySession.permissions.capabilities,
+          ...(response.data?.permissions?.capabilities || {}),
+        },
+      },
+      management: {
+        ...emptySession.management,
+        ...(response.data?.management || {}),
+      },
       release: {
         ...emptySession.release,
         ...(response.data?.release || {}),
@@ -92,6 +141,18 @@ export function AuthProvider({ children }) {
         scope: {
           ...emptySession.scope,
           ...(response.data?.scope || {}),
+        },
+        permissions: {
+          ...emptySession.permissions,
+          ...(response.data?.permissions || {}),
+          capabilities: {
+            ...emptySession.permissions.capabilities,
+            ...(response.data?.permissions?.capabilities || {}),
+          },
+        },
+        management: {
+          ...emptySession.management,
+          ...(response.data?.management || {}),
         },
         release: {
           ...emptySession.release,

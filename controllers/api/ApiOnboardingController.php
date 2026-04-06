@@ -12,12 +12,15 @@ class ApiOnboardingController
         api_require_login();
 
         $userId = api_current_effective_user_id();
+        $planningEnabled = has_current_module_access('planning');
 
         $accountsCount = (new Account())->countByUser($userId);
         $transactionsCount = (new Transaction())->countByUser($userId);
         $targetModel = new Target();
-        $targetsCount = $targetModel->countByUser($userId);
-        $actionSummary = $targetModel->actionSummaryByUser($userId);
+        $targetsCount = $planningEnabled ? $targetModel->countByUser($userId) : 0;
+        $actionSummary = $planningEnabled
+            ? $targetModel->actionSummaryByUser($userId)
+            : ['total_actions' => 0, 'completed_actions' => 0];
 
         api_json_response(true, 'Resumo de onboarding carregado com sucesso.', [
             'stats' => [
@@ -26,6 +29,7 @@ class ApiOnboardingController
                 'targets_count' => $targetsCount,
                 'actions_count' => (int)($actionSummary['total_actions'] ?? 0),
                 'completed_actions_count' => (int)($actionSummary['completed_actions'] ?? 0),
+                'planning_enabled' => $planningEnabled,
             ],
         ]);
     }

@@ -21,7 +21,7 @@ function current_user_id(): ?int
         return null;
     }
 
-    if (!is_admin()) {
+    if (!can_use_visual_scope()) {
         return $loggedUserId;
     }
 
@@ -36,7 +36,7 @@ function current_user_id(): ?int
 
 function scoped_user_id(): ?int
 {
-    if (!is_admin()) {
+    if (!can_use_visual_scope()) {
         return null;
     }
 
@@ -51,10 +51,12 @@ function scoped_user_id(): ?int
 
 function set_scope_user_id(int $userId): void
 {
-    if ($userId > 0 && is_admin()) {
+    if ($userId > 0 && can_use_visual_scope()) {
         $_SESSION['scope_user_id'] = $userId;
     }
 }
+
+require_once __DIR__ . '/access.php';
 
 function clear_scope_user_id(): void
 {

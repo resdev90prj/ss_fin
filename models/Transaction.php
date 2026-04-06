@@ -34,6 +34,25 @@ class Transaction extends Model
             $sql .= ' AND t.type = :type';
             $params['type'] = $filters['type'];
         }
+        if (!empty($filters['exclude_types']) && is_array($filters['exclude_types'])) {
+            $excludePlaceholders = [];
+            $excludeIndex = 0;
+
+            foreach ($filters['exclude_types'] as $excludeType) {
+                $excludeType = trim((string)$excludeType);
+                if ($excludeType === '') {
+                    continue;
+                }
+
+                $param = 'exclude_type_' . $excludeIndex++;
+                $excludePlaceholders[] = ':' . $param;
+                $params[$param] = $excludeType;
+            }
+
+            if ($excludePlaceholders !== []) {
+                $sql .= ' AND t.type NOT IN (' . implode(', ', $excludePlaceholders) . ')';
+            }
+        }
         if (!empty($filters['category_id'])) {
             $sql .= ' AND t.category_id = :category_id';
             $params['category_id'] = (int)$filters['category_id'];

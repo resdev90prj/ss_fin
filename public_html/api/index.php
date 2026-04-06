@@ -19,6 +19,11 @@ require_once api_project_root() . '/controllers/api/ApiOnboardingController.php'
 
 $method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $path = api_request_path();
+$requiredModule = api_required_module_for_path($path);
+
+if ($requiredModule !== null) {
+    api_require_module_access($requiredModule);
+}
 
 switch ($method . ' ' . $path) {
     case 'GET /me':

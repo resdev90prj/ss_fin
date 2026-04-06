@@ -1,6 +1,7 @@
 import {
   Archive,
   ArrowLeftRight,
+  BriefcaseBusiness,
   CalendarClock,
   CircleDollarSign,
   Goal,
@@ -27,6 +28,7 @@ export const moduleRegistry = {
     icon: LayoutDashboard,
     status: 'live',
     description: 'Resumo financeiro, alertas, agenda e score semanal.',
+    requiredModules: ['dashboard'],
   },
   accounts: {
     key: 'accounts',
@@ -37,6 +39,7 @@ export const moduleRegistry = {
     icon: WalletCards,
     status: 'live',
     description: 'Cadastro e status das contas financeiras do usuario.',
+    requiredModules: ['accounts'],
   },
   boxes: {
     key: 'boxes',
@@ -47,6 +50,7 @@ export const moduleRegistry = {
     icon: Vault,
     status: 'live',
     description: 'Organize reservas, saldos dedicados e objetivos do caixa.',
+    requiredModules: ['boxes'],
   },
   categories: {
     key: 'categories',
@@ -57,6 +61,7 @@ export const moduleRegistry = {
     icon: Shapes,
     status: 'live',
     description: 'Classifique receitas e despesas com mais clareza.',
+    requiredModules: ['categories'],
   },
   transactions: {
     key: 'transactions',
@@ -67,6 +72,7 @@ export const moduleRegistry = {
     icon: ArrowLeftRight,
     status: 'live',
     description: 'Receitas e despesas consolidadas em uma experiencia unica.',
+    requiredModules: ['transactions'],
   },
   withdrawals: {
     key: 'withdrawals',
@@ -77,6 +83,7 @@ export const moduleRegistry = {
     icon: CircleDollarSign,
     status: 'live',
     description: 'Retiradas do socio registradas e geridas na mesma experiencia.',
+    requiredModules: ['withdrawals'],
   },
   debts: {
     key: 'debts',
@@ -87,6 +94,7 @@ export const moduleRegistry = {
     icon: Landmark,
     status: 'live',
     description: 'Dividas parceladas, pagamentos, estornos e exclusoes condicionadas.',
+    requiredModules: ['debts'],
   },
   budgets: {
     key: 'budgets',
@@ -97,6 +105,7 @@ export const moduleRegistry = {
     icon: PiggyBank,
     status: 'live',
     description: 'Limites mensais por categoria com manutencao direta na interface.',
+    requiredModules: ['budgets'],
   },
   goals: {
     key: 'goals',
@@ -107,6 +116,7 @@ export const moduleRegistry = {
     icon: Goal,
     status: 'live',
     description: 'Metas financeiras com progresso, ajuste e acompanhamento continuo.',
+    requiredModules: ['planning'],
   },
   targets: {
     key: 'targets',
@@ -117,6 +127,7 @@ export const moduleRegistry = {
     icon: Rocket,
     status: 'live',
     description: 'Acompanhe prioridades, avancos e proximas acoes do plano.',
+    requiredModules: ['planning'],
   },
   agenda: {
     key: 'agenda',
@@ -127,6 +138,7 @@ export const moduleRegistry = {
     icon: CalendarClock,
     status: 'live',
     description: 'Veja o que pede atencao hoje e nos proximos dias.',
+    requiredModules: ['planning'],
   },
   imports: {
     key: 'imports',
@@ -137,6 +149,7 @@ export const moduleRegistry = {
     icon: Upload,
     status: 'live',
     description: 'Upload manual e fila OFX operando dentro do proprio modulo.',
+    requiredModules: ['imports'],
   },
   reports: {
     key: 'reports',
@@ -147,6 +160,18 @@ export const moduleRegistry = {
     icon: Archive,
     status: 'live',
     description: 'Relatorios consolidados com filtros e resultado liquido do periodo.',
+    requiredModules: ['reports'],
+  },
+  manager_clients: {
+    key: 'manager_clients',
+    path: '/manager-clients',
+    label: 'Gestor Financeiro',
+    shortLabel: 'Clientes e modulos',
+    group: 'management',
+    icon: BriefcaseBusiness,
+    status: 'live',
+    description: 'Administre clientes vinculados, modulos e troca de contexto.',
+    requiredModules: ['manager_clients'],
   },
   profile: {
     key: 'profile',
@@ -157,6 +182,7 @@ export const moduleRegistry = {
     icon: UserRound,
     status: 'live',
     description: 'Dados pessoais, senha e preferencias da central de alertas.',
+    requiredModules: ['profile'],
   },
   users: {
     key: 'users',
@@ -166,8 +192,8 @@ export const moduleRegistry = {
     group: 'admin',
     icon: Users,
     status: 'live',
-    description: 'Gerencie acessos, perfis, status e visualizacao administrativa.',
-    adminOnly: true,
+    description: 'Gerencie acessos, perfis, status, modulos e visualizacao administrativa.',
+    requiredModules: ['users'],
   },
   logout: {
     key: 'logout',
@@ -178,6 +204,7 @@ export const moduleRegistry = {
     icon: LogOut,
     status: 'action',
     description: 'Encerrar sua sessao com seguranca.',
+    requiredModules: [],
   },
 };
 
@@ -187,11 +214,14 @@ export const menuGroups = [
   { key: 'planning', label: 'Planejamento' },
   { key: 'operations', label: 'Operacao' },
   { key: 'analysis', label: 'Analise' },
+  { key: 'management', label: 'Gestao' },
   { key: 'account', label: 'Conta' },
   { key: 'admin', label: 'Admin' },
 ];
 
-export function getNavigationGroups({ isAdmin = false } = {}) {
+export function getNavigationGroups({ visibleModuleKeys = [] } = {}) {
+  const visibleSet = new Set(visibleModuleKeys);
+
   return menuGroups
     .map((group) => ({
       ...group,
@@ -200,11 +230,7 @@ export function getNavigationGroups({ isAdmin = false } = {}) {
           return false;
         }
 
-        if (item.adminOnly && !isAdmin) {
-          return false;
-        }
-
-        return true;
+        return (item.requiredModules || []).every((moduleKey) => visibleSet.has(moduleKey));
       }),
     }))
     .filter((group) => group.items.length > 0);
